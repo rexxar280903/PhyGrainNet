@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use PhyGrainNet in research, cite this repository and the eventual paper once available."
+title: "PhyGrainNet"
+type: software
+version: 0.1.0
+date-released: 2026-10-04
+license: MIT
+repository-code: "https://github.com/rexxar280903/PhyGrainNet"
