@@ -1,0 +1,32 @@
+project: PhyGrainNet
+seed: 42
+
+data:
+  root: /kaggle/input/soil-grain-size-from-photos
+  work_root: /kaggle/working/phygrainnet
+  input_size: 192
+  num_workers: 2
+
+model:
+  name: phygrainnet_v0
+  num_outputs: 11
+  channels: [32, 48, 96, 160, 224]
+  blocks: [1, 2, 2, 3, 2]
+  dropout: 0.20
+
+training:
+  epochs: 250
+  batch_size: 4
+  optimizer: adamw
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  gradient_clip_norm: 1.0
+  early_stopping_patience: 40
+
+validation:
+  strategy: group_kfold
+  folds: 5
+  primary_metric: competition_emd
+
+notes:
+  - Dataset filenames and the official metric are locked only after P2 audit.
