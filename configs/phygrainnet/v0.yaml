@@ -1,0 +1,13 @@
+experiment_id: C000
+base: ../default.yaml
+model:
+  name: phygrainnet_v0
+  pretrained: false
+  constrained_distribution_head: true
+  physical_scale: false
+  multi_scale: false
+  texture_stream: false
+  multi_view: false
+notes:
+  - First custom architecture checkpoint.
+  - Intentionally simple so later additions can be ablated.
