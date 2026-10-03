@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phygrainnet"
+version = "0.1.0"
+description = "Physical-scale-aware multi-view neural architecture for soil grain-size distribution estimation"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.0",
+  "Pillow>=10.0",
+  "torch>=2.2",
+  "PyYAML>=6.0",
+  "scikit-learn>=1.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
