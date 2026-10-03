@@ -1,0 +1,137 @@
+{
+  "project": "PhyGrainNet",
+  "overall_progress_percent": 8,
+  "competition_readiness_percent": 3,
+  "current_phase": "P1",
+  "current_phase_name": "Repository Foundation",
+  "next_phase": "P2",
+  "next_phase_name": "Dataset Audit",
+  "default_seed": 42,
+  "primary_environment": "Kaggle Notebook / Kaggle IDE",
+  "best_local_cv_emd": null,
+  "best_public_score": null,
+  "gates": {
+    "G0": {
+      "name": "Research Specification",
+      "status": "in_progress",
+      "completion": 0.875
+    },
+    "G1": {
+      "name": "Data Integrity",
+      "status": "blocked",
+      "completion": 0
+    },
+    "G2": {
+      "name": "Experimental Validity",
+      "status": "blocked",
+      "completion": 0
+    },
+    "G3": {
+      "name": "Architecture Validation",
+      "status": "blocked",
+      "completion": 0
+    },
+    "G4": {
+      "name": "Competition Ready",
+      "status": "blocked",
+      "completion": 0
+    },
+    "G5": {
+      "name": "Research Ready",
+      "status": "blocked",
+      "completion": 0
+    }
+  },
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Research specification",
+      "cumulative_progress": 4,
+      "status": "complete"
+    },
+    {
+      "id": "P1",
+      "name": "Repository foundation",
+      "cumulative_progress": 8,
+      "status": "complete"
+    },
+    {
+      "id": "P2",
+      "name": "Dataset audit",
+      "cumulative_progress": 14,
+      "status": "next"
+    },
+    {
+      "id": "P3",
+      "name": "EDA",
+      "cumulative_progress": 20,
+      "status": "pending"
+    },
+    {
+      "id": "P4",
+      "name": "Exact metric + leakage-safe CV",
+      "cumulative_progress": 28,
+      "status": "pending"
+    },
+    {
+      "id": "P5",
+      "name": "Baselines",
+      "cumulative_progress": 38,
+      "status": "pending"
+    },
+    {
+      "id": "P6",
+      "name": "PhyGrainNet v0",
+      "cumulative_progress": 50,
+      "status": "pending"
+    },
+    {
+      "id": "P7",
+      "name": "Physical multi-scale modelling",
+      "cumulative_progress": 60,
+      "status": "pending"
+    },
+    {
+      "id": "P8",
+      "name": "Texture + multi-view modelling",
+      "cumulative_progress": 70,
+      "status": "pending"
+    },
+    {
+      "id": "P9",
+      "name": "Ablation study",
+      "cumulative_progress": 80,
+      "status": "pending"
+    },
+    {
+      "id": "P10",
+      "name": "Robust evaluation",
+      "cumulative_progress": 87,
+      "status": "pending"
+    },
+    {
+      "id": "P11",
+      "name": "Ensemble + Kaggle submission",
+      "cumulative_progress": 92,
+      "status": "pending"
+    },
+    {
+      "id": "P12",
+      "name": "Error analysis",
+      "cumulative_progress": 96,
+      "status": "pending"
+    },
+    {
+      "id": "P13",
+      "name": "Reproducibility packaging",
+      "cumulative_progress": 98,
+      "status": "pending"
+    },
+    {
+      "id": "P14",
+      "name": "Paper-ready evidence",
+      "cumulative_progress": 100,
+      "status": "pending"
+    }
+  ]
+}
