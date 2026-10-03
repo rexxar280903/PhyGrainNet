@@ -1,0 +1,15 @@
+experiment_id: D004
+base: ../default.yaml
+model:
+  name: phygrainnet_full
+  pretrained: false
+  constrained_distribution_head: true
+  physical_scale: true
+  physical_scales_mm: [10, 20, 40]
+  multi_scale: true
+  texture_stream: true
+  multi_view: true
+  view_aggregation: mean_std_attention
+notes:
+  - Candidate final design; physical scales remain provisional until dataset audit.
+  - Do not use as scientific evidence before preceding ablations.
