@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Kaggle / data
+/kaggle/
+data/raw/
+data/interim/
+data/processed/
+*.zip
+
+# Large ML artifacts
+*.pt
+*.pth
+*.ckpt
+outputs/checkpoints/
+outputs/logs/*
+outputs/predictions/*
+
+# Secrets
+.env
+kaggle.json
+*.pem
