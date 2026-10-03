@@ -1,0 +1,8 @@
+experiment_id: B000
+base: ../default.yaml
+model:
+  name: simple_cnn_scratch
+  pretrained: false
+notes:
+  - Baseline only.
+  - Must use exactly the same folds as PhyGrainNet comparisons.
