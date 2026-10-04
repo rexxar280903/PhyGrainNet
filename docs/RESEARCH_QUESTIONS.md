@@ -40,6 +40,18 @@ Does an EMD-aligned objective improve the official validation score relative to 
 
 **H6:** lower official EMD under the same folds and architecture.
 
+## RQ7 — Pretraining on external soil data from scratch
+
+Does supervised pretraining on a public soil dataset with partial labels (ETS, 0.08–80 mm) improve the competition score of a randomly initialised model, including on points the external data never labels?
+
+**H7:** D200 < C100 in grouped-CV EMD, with gains concentrated at 0.2–20 mm.
+
+## RQ8 — Self-supervised pretraining under a camera shift
+
+Does SimCLR on unlabelled soil tiles (including the iPhone test photos) reduce the train-camera → test-camera gap?
+
+**H8:** D100 < C100, and a smaller gap in camera-holdout CV.
+
 ## Evidence rule
 
 A hypothesis is supported only by controlled comparisons using the same folds, preprocessing, seed policy, and metric implementation, with improvement not isolated to a single fold.

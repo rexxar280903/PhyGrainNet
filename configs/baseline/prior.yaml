@@ -1,0 +1,8 @@
+# A000 - image-free baselines (training mean / median). Run scripts/baseline_prior.py.
+experiment_id: A000
+base: ../default.yaml
+pipeline: classical
+classical:
+  models:
+    - {name: prior_median, kind: prior_median}
+    - {name: prior_mean, kind: prior_mean}

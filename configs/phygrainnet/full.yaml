@@ -1,15 +1,14 @@
-experiment_id: D004
+# D300 - candidate final: SSL encoder -> ETS supervised pretrain -> competition fine-tune.
+experiment_id: D300
 base: ../default.yaml
-model:
-  name: phygrainnet_full
-  pretrained: false
-  constrained_distribution_head: true
-  physical_scale: true
-  physical_scales_mm: [10, 20, 40]
-  multi_scale: true
-  texture_stream: true
-  multi_view: true
-  view_aggregation: mean_std_attention
-notes:
-  - Candidate final design; physical scales remain provisional until dataset audit.
-  - Do not use as scientific evidence before preceding ablations.
+pipeline: cnn
+cv:
+  strategy: group_kfold
+  n_folds: 5
+training:
+  init_checkpoint: /kaggle/working/outputs/P100/ets_pretrained.pt
+  init_encoder_only: false
+  learning_rate: 0.0003
+  epochs: 30
+  full_fit: true
+notes_short: SSL(P000) -> ETS(P100) -> fine-tune

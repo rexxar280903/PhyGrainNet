@@ -1,228 +1,112 @@
 # PhyGrainNet
 
-**Physical-Scale-Aware Multi-View Neural Architecture for Soil Grain-Size Distribution Estimation from Images**
+**Physical-scale-aware multi-view neural architecture for soil grain-size distribution estimation from phone photos — trained from scratch.**
 
-PhyGrainNet is a research-first Kaggle project for the **Soil Grain Size from Photos** competition. The primary track develops a compact neural architecture **from scratch**, rather than fine-tuning an ImageNet backbone, while explicitly modelling physical image scale, soil texture, multi-scale context, multiple views of the same physical sample, and the monotonic structure of cumulative grain-size distributions (GSDs).
+PhyGrainNet is our entry to the Kaggle competition [Predicting Soil Grain Size Distributions from Images](https://www.kaggle.com/competitions/soil-grain-size-from-photos) (BOKU / EU project GRID). The goal is a top private-leaderboard result with **models trained by us from random initialisation** — no ImageNet or other generic-image weights anywhere (DEC-001) — while using public soil datasets for our own pretraining (DEC-004).
 
 ## Project status
 
-**Overall project progress: 8%**
+<!-- STATUS:START -->
+**Overall project progress: 10%**  
+`███░░░░░░░░░░░░░░░░░░░░░░░ 10%`
 
-`██░░░░░░░░░░░░░░░░░░░░░░░░ 8%`
+**Competition readiness: 10%**  
+`███░░░░░░░░░░░░░░░░░░░░░░░ 10%`
 
-**Competition readiness: 3%**
+**Current phase:** P2 — Dataset Audit (code ready, Kaggle run pending)  
+**Next phase:** P5 — Baselines + first submission  
+**Best grouped-CV EMD:** not established yet  
+**Best public LB (not used for selection):** no submission yet  
+**Deadline:** 2026-11-30 18:00 WIB
+<!-- STATUS:END -->
 
-`█░░░░░░░░░░░░░░░░░░░░░░░░░ 3%`
+`project_status.json` is the source of truth; `python scripts/update_readiness.py` regenerates this block (CI checks it). The week-by-week plan is in [`docs/SCHEDULE.md`](docs/SCHEDULE.md).
 
-**Current phase:** P1 — Repository Foundation  
-**Current readiness gate:** G0 — Research Specification  
-**Best leakage-safe CV EMD:** not established yet  
-**Best Kaggle score:** no submission yet  
-**Primary execution environment:** Kaggle Notebook / Kaggle IDE  
-**Default development seed:** 42
+## The task in one table
 
-Progress is milestone-based, not manually estimated. `project_status.json` is the machine-readable source of truth and `scripts/update_readiness.py` regenerates the status block.
+| | |
+|---|---|
+| Input | 2–5 phone photos of one soil sample, camera at 21 cm, known px/mm per phone |
+| Output | cumulative % passing at 11 diameters, 0.002 → 200 mm, non-decreasing, last value exactly 100 |
+| Metric | log-weighted EMD: Σ\|F−F̂\|·Δlog10(d) over 10 intervals, mean over samples, lower is better |
+| Train | **24 soils** (127 photos, Motorola Edge / Edge 60 Fusion / Samsung A52) |
+| Test | **10 soils** from other sites (35 photos, **iPhone 14 / 16 only**); public LB = 3 fixed soils |
 
-## Why we are doing this
+Reference scores on the training labels: training-median baseline ≈ 90–97, oracle nearest training curve ≈ 14.
 
-The project has two simultaneous goals.
-
-### Competition goal
-
-Build a robust system that predicts the cumulative grain-size distribution of a soil sample from photographs and minimizes the competition's Earth Mover's Distance (EMD) evaluation metric without relying on leaderboard overfitting.
-
-### Research goal
-
-Investigate whether a purpose-built vision architecture can exploit information that generic image classifiers do not model explicitly:
-
-- physical pixel-to-millimetre scale;
-- fine-to-coarse granular texture;
-- multiple photographs of the same physical soil sample;
-- the fact that a valid GSD is monotonic and mass-conserving;
-- metric-aligned learning using distribution-aware objectives.
-
-The primary scientific output is intended to be a reproducible architecture and experimental record suitable for later manuscript development, not merely a Kaggle submission.
-
-## Primary targets
-
-The project will not declare success from a public leaderboard score alone. The current engineering targets are:
-
-| Target | Goal |
-|---|---:|
-| Monotonicity violations | **0** |
-| Invalid final cumulative endpoint | **0** |
-| Reproducible Kaggle inference | **100%** |
-| Leakage-safe CV established | Required before architecture claims |
-| Initial CV milestone | EMD < 40 |
-| Strong CV milestone | EMD < 25 |
-| Competitive research milestone | EMD < 15 |
-| Stretch milestone | EMD < 8 |
-| Architecture evidence | Full ablation completed |
-| Final scientific validation | Multiple seeds + robust grouped evaluation |
-
-The numeric EMD milestones are engineering targets and may be revised after the exact competition metric and dataset structure are verified in the audit phase.
-
-## Core hypothesis
-
-A generic pixel-space CNN must learn physical scale, texture primitives, cross-view consistency, and valid cumulative-distribution geometry from a very small number of independent soil samples. PhyGrainNet instead injects these inductive biases directly into the design.
+## Approach
 
 ```text
-Soil sample
-    │
-    ├── Photo 1 ─┐
-    ├── Photo 2 ─┼─> physical-scale crops
-    └── Photo N ─┘          │
-                            v
-                  multi-scale grain encoder
-                            │
-                  RGB + texture representation
-                            │
-                     scale aggregation
-                            │
-                      view aggregation
-                            │
-                  sample-level embedding
-                            │
-                    distribution head
-                            │
-                  11 non-negative masses
-                            │
-                      cumulative sum
-                            │
-                         valid GSD
+photos ──► crop border ─► resample to 10 px/mm ─► gray-world colour
+             │
+             ├─► A-track: granulometry / Fourier / gradient / LBP features (mm units)
+             │            └─► ridge / PLS in log-ratio space, kNN median
+             │
+             └─► PhyGrainNet-MV: tiles at 25.6 mm + 102.4 mm fields
+                   GrainEncoder (RGB + fixed Sobel/Laplacian) ─► attention pooling over all tiles
+                   ─► softmax interval masses ─► cumsum ─► valid curve
+                   init: random │ own SimCLR (P000) │ own ETS-supervised model (P100)
+
+OOF per model ─► pointwise-median ensemble (greedy on grouped CV) ─► make_valid ─► submission
 ```
 
-## Input and output
+Key choices and their reasons are in [`docs/DECISIONS.md`](docs/DECISIONS.md); architecture details in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-The intended training unit is a **physical soil sample**, not an independent photograph.
+## Quick start (Kaggle)
 
-Input:
-
-```text
-{image_1, image_2, ..., image_N} + physical-scale metadata
+```bash
+!git clone -q https://github.com/rexxar280903/PhyGrainNet.git /kaggle/working/PhyGrainNet
+%cd /kaggle/working/PhyGrainNet
+!pip install -q -e .
+!python scripts/audit_dataset.py                                   # P2: catalog + checks
+!python scripts/baseline_prior.py                                  # A000: first valid submission
+!python scripts/train.py --config configs/classical/features_v1.yaml   # A001
+!python scripts/train.py --config configs/phygrainnet/mv_scratch.yaml  # C100 (GPU)
+!python scripts/ensemble.py --runs /kaggle/working/outputs/A001_ridge10 /kaggle/working/outputs/C100 \
+    --out /kaggle/working/submission_H001.csv
 ```
 
-Output:
-
-```text
-[F(d1), F(d2), ..., F(d11)]
-```
-
-where `F(d)` is the cumulative percentage passing a grain diameter threshold. The distribution head predicts non-negative interval masses with a softmax and converts them to cumulative percentages using `cumsum`, guaranteeing monotonic predictions by construction.
-
-## Kaggle-first data workflow
-
-The competition dataset is **not stored in this repository** and does not need to be downloaded to the local computer. Training and dataset inspection are designed to run directly in Kaggle.
-
-The default configuration expects a competition dataset under a Kaggle input mount such as:
-
-```python
-from pathlib import Path
-DATA_ROOT = Path('/kaggle/input/soil-grain-size-from-photos')
-```
-
-The exact directory and filenames are verified by `scripts/audit_dataset.py` before training. No model training is considered valid until the dataset integrity gate passes.
-
-See [`docs/KAGGLE_WORKFLOW.md`](docs/KAGGLE_WORKFLOW.md).
-
-## Readiness gates
-
-| Gate | Purpose | Initial status |
-|---|---|---|
-| G0 | Research specification | IN PROGRESS |
-| G1 | Data integrity | BLOCKED until Kaggle audit |
-| G2 | Experimental validity | BLOCKED |
-| G3 | Architecture validation | BLOCKED |
-| G4 | Competition ready | BLOCKED |
-| G5 | Research ready | BLOCKED |
-
-Full criteria: [`docs/READINESS_GATE.md`](docs/READINESS_GATE.md).
-
-## Project phases
-
-| Phase | Milestone | Cumulative progress |
-|---|---|---:|
-| P0 | Research specification | 4% |
-| P1 | Repository foundation | 8% |
-| P2 | Dataset audit | 14% |
-| P3 | EDA | 20% |
-| P4 | Exact metric + leakage-safe CV | 28% |
-| P5 | Baselines | 38% |
-| P6 | PhyGrainNet v0 | 50% |
-| P7 | Physical multi-scale modelling | 60% |
-| P8 | Texture + multi-view modelling | 70% |
-| P9 | Ablation study | 80% |
-| P10 | Robust evaluation | 87% |
-| P11 | Ensemble + Kaggle submission | 92% |
-| P12 | Error analysis | 96% |
-| P13 | Reproducibility packaging | 98% |
-| P14 | Paper-ready evidence | 100% |
-
-Detailed plan: [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md).
+Or import [`notebooks/kaggle_runner.ipynb`](notebooks/kaggle_runner.ipynb). Full command list: [`docs/KAGGLE_WORKFLOW.md`](docs/KAGGLE_WORKFLOW.md).
 
 ## Experiment families
 
-```text
-Axxx  non-neural/statistical baselines
-Bxxx  simple CNN baselines from scratch
-Cxxx  GrainBlock and physical-scale experiments
-Dxxx  multi-view PhyGrainNet experiments
-Exxx  loss-function experiments
-Fxxx  ablations
-Gxxx  test-time augmentation
-Hxxx  ensembles
-```
+| ID | Meaning |
+|---|---|
+| A | hand-crafted physical features + small models |
+| B | plain CNN baselines (random init) |
+| C | PhyGrainNet, random init, competition data only |
+| D | PhyGrainNet initialised from our own pretraining (SSL / ETS) |
+| E / F / G | loss / ablation / TTA |
+| H | ensembles |
+| P | pretraining runs |
 
-Every run must record its configuration, seed, fold, Git commit, validation metrics, runtime, and notes in `experiments/registry.csv`.
+Every run writes `oof.csv`, `test.csv`, `metrics.json` and a row in `experiments/registry.csv`.
 
 ## Repository layout
 
 ```text
-PhyGrainNet/
-├── configs/              experiment configuration
-├── docs/                 research protocol and decisions
-├── notebooks/            EDA / analysis notebooks only
-├── src/phygrainnet/      reusable source package
-├── scripts/              Kaggle entry points
-├── experiments/          experiment registry
-├── outputs/              local/Kaggle run outputs (mostly ignored)
-├── tests/                metric, model and data-invariant tests
-├── project_status.json   machine-readable readiness state
-└── .github/workflows/    CI and readiness automation
+configs/            default.yaml + per-experiment configs (base: inheritance, CLI overrides)
+docs/               decisions, rules audit, dataset facts, schedule, forum drafts, plan
+notebooks/          kaggle_runner.ipynb
+scripts/            audit, baseline, train (all pipelines), ensemble, submission, ETS tools
+src/phygrainnet/
+  data/             catalog (file names → sample/camera/ppm), imaging, labels + grouped folds, ETS labels
+  features/         granulometry features
+  models/           PhyGrainNet-MV, GrainBlock, constrained head, classical models
+  training/         datasets, trainer, SimCLR, pipelines
+  losses.py  metrics/  postprocess.py  submission.py  experiment.py
+tests/              synthetic dataset with the real naming; end-to-end smoke tests
 ```
 
-## Non-negotiable research rules
+## Non-negotiable rules
 
-1. No photo-level random split when photographs share a physical soil target.
-2. No architecture claim before leakage-safe grouped validation exists.
-3. The primary architecture track uses no pretrained visual backbone.
-4. Any optional pretrained model is labelled strictly as a comparison baseline.
-5. Kaggle public leaderboard score never replaces local out-of-fold evaluation.
-6. Every submission must map to an experiment ID and Git commit.
-7. Predictions must satisfy physical distribution constraints before submission.
-8. Changes that improve one fold but degrade generalisation are not automatically accepted.
+1. No photo-level or sample-level random split: folds are by site group (DEC-005).
+2. No weights that did not come from this repository (DEC-001; enforced when loading checkpoints).
+3. Public leaderboard is never used for selection; no probing; no searching for test-site lab results (DEC-006).
+4. Every submission maps to an experiment ID and a Git commit (`docs/LEADERBOARD_LOG.md`).
+5. Every prediction passes `make_valid` and `validate_submission` before upload.
+6. External data must be public, free and announced on the forum (DEC-004).
 
-## Immediate next milestone
+## Documentation
 
-**P2 — Dataset Audit in Kaggle**
-
-The next run must establish the real dataset schema, unique sample IDs, photographs per sample, image dimensions, PPM metadata, missing values, duplicate risks, target monotonicity, train/test organisation, and potential leakage paths. Only then will the exact fold strategy and PhyGrainNet input pipeline be locked.
-
-## Research documentation
-
-- [Project plan](docs/PROJECT_PLAN.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Research questions](docs/RESEARCH_QUESTIONS.md)
-- [Readiness gates](docs/READINESS_GATE.md)
-- [Experiment protocol](docs/EXPERIMENT_PROTOCOL.md)
-- [Dataset audit specification](docs/DATASET.md)
-- [Metrics](docs/METRICS.md)
-- [Kaggle workflow](docs/KAGGLE_WORKFLOW.md)
-- [Competition rules audit](docs/COMPETITION_RULES.md)
-- [Decision log](docs/DECISIONS.md)
-- [Paper plan](docs/PAPER_PLAN.md)
-- [Leaderboard/submission log](docs/LEADERBOARD_LOG.md)
-
----
-
-**Current principle:** build the evaluation system first, then earn the right to optimize the model.
+[Schedule](docs/SCHEDULE.md) · [Decisions](docs/DECISIONS.md) · [Competition rules](docs/COMPETITION_RULES.md) · [Dataset](docs/DATASET.md) · [External data](docs/EXTERNAL_DATA.md) · [Metrics](docs/METRICS.md) · [Architecture](docs/ARCHITECTURE.md) · [Project plan](docs/PROJECT_PLAN.md) · [Readiness gates](docs/READINESS_GATE.md) · [Research questions](docs/RESEARCH_QUESTIONS.md) · [Experiment protocol](docs/EXPERIMENT_PROTOCOL.md) · [Kaggle workflow](docs/KAGGLE_WORKFLOW.md) · [Forum drafts](docs/FORUM_POSTS.md) · [Leaderboard log](docs/LEADERBOARD_LOG.md) · [Paper plan](docs/PAPER_PLAN.md)

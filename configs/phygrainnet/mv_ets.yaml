@@ -1,0 +1,13 @@
+# D200 - PhyGrainNet-MV initialised from supervised ETS pretraining (P100), fine-tuned here.
+experiment_id: D200
+base: ../default.yaml
+pipeline: cnn
+cv:
+  strategy: group_kfold
+  n_folds: 5
+training:
+  init_checkpoint: /kaggle/working/outputs/P100/ets_pretrained.pt
+  init_encoder_only: false
+  learning_rate: 0.0003
+  epochs: 30
+notes_short: init from own ETS-supervised model

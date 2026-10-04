@@ -30,3 +30,8 @@ outputs/predictions/*
 .env
 kaggle.json
 *.pem
+
+# Packaging / local runs
+*.egg-info/
+build/
+outputs/

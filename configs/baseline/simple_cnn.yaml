@@ -1,8 +1,15 @@
+# B000 - PhyGrainNet V0 (plain single-view CNN) on the same folds, for the ablation table.
 experiment_id: B000
 base: ../default.yaml
+pipeline: cnn
+data:
+  fields_mm: [25.6]
 model:
-  name: simple_cnn_scratch
-  pretrained: false
-notes:
-  - Baseline only.
-  - Must use exactly the same folds as PhyGrainNet comparisons.
+  name: phygrainnet_mv
+  texture_stream: false
+  channels: [32, 64, 128, 256]
+  blocks: [1, 1, 1, 1]
+cv:
+  strategy: group_kfold
+  n_folds: 5
+notes_short: plain CNN baseline, random init

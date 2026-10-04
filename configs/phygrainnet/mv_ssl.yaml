@@ -1,0 +1,12 @@
+# D100 - PhyGrainNet-MV initialised from our own SimCLR encoder (P000).
+experiment_id: D100
+base: ../default.yaml
+pipeline: cnn
+cv:
+  strategy: group_kfold
+  n_folds: 5
+training:
+  init_checkpoint: /kaggle/working/outputs/P000/ssl_encoder.pt
+  init_encoder_only: true
+  learning_rate: 0.0005
+notes_short: init from own SimCLR encoder

@@ -1,24 +1,24 @@
+"""Official competition metric (verified against the Kaggle Evaluation page, 2026-10-04).
+
+EMD = sum_{i=1..10} |F_i - F^_i| * (log10(x_{i+1}) - log10(x_i))
+
+The final score is the mean over samples, range [0, 500], lower is better.
+Note the left-point rule: the 200 mm value never contributes.
+"""
 from __future__ import annotations
 
 import numpy as np
 
+from phygrainnet.constants import DIAMETERS_MM
 
-DEFAULT_DIAMETERS_MM = np.array(
-    [0.002, 0.0063, 0.02, 0.063, 0.2, 0.63, 2.0, 6.3, 20.0, 63.0, 200.0],
-    dtype=np.float64,
-)
+DEFAULT_DIAMETERS_MM = DIAMETERS_MM
 
 
-def provisional_log_grid_emd(
+def emd_per_sample(
     y_true: np.ndarray,
     y_pred: np.ndarray,
     diameters_mm: np.ndarray = DEFAULT_DIAMETERS_MM,
 ) -> np.ndarray:
-    """Provisional log-grid cumulative EMD.
-
-    This must be verified against the live Kaggle evaluation definition before
-    it is promoted to the official project metric.
-    """
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
     diameters_mm = np.asarray(diameters_mm, dtype=np.float64)
@@ -35,5 +35,19 @@ def provisional_log_grid_emd(
     return np.sum(cumulative_error * log_width, axis=-1)
 
 
-def mean_provisional_log_grid_emd(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    return float(np.mean(provisional_log_grid_emd(y_true, y_pred)))
+def competition_emd(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Mean official EMD over samples (the leaderboard number)."""
+    return float(np.mean(emd_per_sample(y_true, y_pred)))
+
+
+def per_point_contribution(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+    """Mean contribution of each of the 10 left points to the EMD (diagnostics)."""
+    y_true = np.asarray(y_true, dtype=np.float64)
+    y_pred = np.asarray(y_pred, dtype=np.float64)
+    w = np.diff(np.log10(DEFAULT_DIAMETERS_MM))
+    return np.mean(np.abs(y_true[:, :-1] - y_pred[:, :-1]) * w, axis=0)
+
+
+# Backwards-compatible names (the provisional implementation turned out to be exact).
+provisional_log_grid_emd = emd_per_sample
+mean_provisional_log_grid_emd = competition_emd

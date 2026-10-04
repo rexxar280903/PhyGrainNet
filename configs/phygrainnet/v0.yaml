@@ -1,13 +1,13 @@
+# C000 - single-scale baseline (no texture stream), kept for the ablation table.
 experiment_id: C000
 base: ../default.yaml
+pipeline: cnn
+data:
+  fields_mm: [25.6]
 model:
-  name: phygrainnet_v0
-  pretrained: false
-  constrained_distribution_head: true
-  physical_scale: false
-  multi_scale: false
+  name: phygrainnet_mv
   texture_stream: false
-  multi_view: false
-notes:
-  - First custom architecture checkpoint.
-  - Intentionally simple so later additions can be ablated.
+cv:
+  strategy: group_kfold
+  n_folds: 5
+notes_short: single-scale, RGB only, random init

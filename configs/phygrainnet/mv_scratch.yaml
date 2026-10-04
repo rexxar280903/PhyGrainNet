@@ -1,0 +1,8 @@
+# C100 - full PhyGrainNet-MV from random init, competition data only.
+experiment_id: C100
+base: ../default.yaml
+pipeline: cnn
+cv:
+  strategy: group_kfold
+  n_folds: 5
+notes_short: multi-scale 25.6+102.4mm, texture stream, attention view pooling, random init

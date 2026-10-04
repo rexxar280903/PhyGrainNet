@@ -1,85 +1,62 @@
+"""P2 dataset audit: index photos, verify labels, report scale per camera and CV groups.
+
+    python scripts/audit_dataset.py --data-root /kaggle/input/soil-grain-size-from-photos
+"""
 from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter
 from pathlib import Path
 
-import pandas as pd
-from PIL import Image
+import _bootstrap  # noqa: F401
+import numpy as np
 
-
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
-
-
-def discover_files(root: Path):
-    return [p for p in root.rglob("*") if p.is_file()]
+from phygrainnet.constants import TARGET_COLUMNS
+from phygrainnet.data.catalog import build_catalog, catalog_problems
+from phygrainnet.data.labels import label_matrix, load_test_ids, load_train_labels, site_groups
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Audit the live Kaggle competition dataset.")
-    parser.add_argument(
-        "--data-root",
-        type=Path,
-        default=Path("/kaggle/input/soil-grain-size-from-photos"),
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path("/kaggle/working/phygrainnet/dataset_audit.json"),
-    )
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data-root", type=Path, default=Path("/kaggle/input/soil-grain-size-from-photos"))
+    ap.add_argument("--out-dir", type=Path, default=Path("/kaggle/working/phygrainnet/audit"))
+    ap.add_argument("--scale-mode", default="resize", choices=["resize", "native"])
+    args = ap.parse_args()
 
-    root = args.data_root
-    if not root.exists():
-        raise FileNotFoundError(f"Dataset root not found: {root}")
+    labels = load_train_labels(args.data_root)
+    test_ids = load_test_ids(args.data_root)
+    y = label_matrix(labels)
+    cat = build_catalog(args.data_root, scale_mode=args.scale_mode)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    cat.to_csv(args.out_dir / "catalog.csv", index=False)
 
-    files = discover_files(root)
-    images = [p for p in files if p.suffix.lower() in IMAGE_EXTENSIONS]
-    csvs = [p for p in files if p.suffix.lower() == ".csv"]
-
-    dims = Counter()
-    unreadable = []
-    for p in images:
-        try:
-            with Image.open(p) as im:
-                dims[f"{im.width}x{im.height}"] += 1
-        except Exception as exc:
-            unreadable.append({"path": str(p), "error": repr(exc)})
-
-    csv_summary = {}
-    for p in csvs:
-        try:
-            df = pd.read_csv(p)
-            csv_summary[str(p.relative_to(root))] = {
-                "rows": int(len(df)),
-                "columns": list(map(str, df.columns)),
-                "missing_by_column": {str(k): int(v) for k, v in df.isna().sum().items()},
-            }
-        except Exception as exc:
-            csv_summary[str(p.relative_to(root))] = {"error": repr(exc)}
+    groups = site_groups(labels["sample_id"].tolist())
+    group_map = {}
+    for sid, g in zip(labels["sample_id"], groups):
+        group_map.setdefault(int(g), []).append(sid)
 
     report = {
-        "data_root": str(root),
-        "total_files": len(files),
-        "image_count": len(images),
-        "csv_count": len(csvs),
-        "image_dimensions": dict(dims),
-        "csvs": csv_summary,
-        "unreadable_images": unreadable,
-        "next_manual_checks": [
-            "identify the physical sample key",
-            "verify photos per physical sample",
-            "verify PPM metadata key and range",
-            "verify target column order and monotonicity",
-            "check duplicate and near-duplicate risks",
-            "document train/test leakage risks",
-        ],
+        "n_train_samples": len(labels),
+        "n_test_samples": len(test_ids),
+        "n_photos": {s: int((cat.split == s).sum()) for s in ("train", "test")},
+        "photos_per_sample": cat.groupby(["split", "sample_id"]).size().groupby("split").describe().round(2).to_dict(),
+        "camera_by_split": cat.groupby(["split", "camera"]).size().unstack(fill_value=0).to_dict(),
+        "image_sizes": cat.groupby(["camera", "width", "height"]).size().reset_index(name="n").to_dict("records"),
+        "ppm_by_camera": cat.groupby("camera")["ppm"].agg(["min", "max"]).round(3).to_dict("index"),
+        "field_of_view_mm": cat.groupby("camera")[["field_w_mm", "field_h_mm"]].median().round(1).to_dict("index"),
+        "labels": {
+            "monotone_violations": int((np.diff(y, axis=1) < -1e-9).sum()),
+            "out_of_range": int(((y < 0) | (y > 100)).sum()),
+            "last_not_100": labels.loc[y[:, -1] != 100, "sample_id"].tolist(),
+            "column_means": dict(zip(TARGET_COLUMNS, y.mean(0).round(2).tolist())),
+        },
+        "cv_groups": group_map,
+        "problems": catalog_problems(cat, labels["sample_id"].tolist(), test_ids),
     }
-
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(json.dumps(report, indent=2))
+    (args.out_dir / "dataset_audit.json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    print(json.dumps(report, indent=2, default=str))
+    if report["problems"]:
+        print("\n!! fix the problems above before training (see docs/DATASET.md)")
 
 
 if __name__ == "__main__":

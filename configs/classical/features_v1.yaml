@@ -1,0 +1,13 @@
+# A001 - physically scaled hand-crafted features + small models (no learned image weights).
+experiment_id: A001
+base: ../default.yaml
+pipeline: classical
+classical:
+  models:
+    - {name: prior_median, kind: prior_median}
+    - {name: ridge10, kind: ridge_clr, alpha: 10}
+    - {name: ridge100, kind: ridge_clr, alpha: 100}
+    - {name: pls2, kind: pls_clr, n_components: 2}
+    - {name: pls4, kind: pls_clr, n_components: 4}
+    - {name: knn3, kind: knn_median, k: 3}
+    - {name: knn5, kind: knn_median, k: 5}
