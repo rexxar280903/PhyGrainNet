@@ -1,32 +1,61 @@
 project: PhyGrainNet
 seed: 42
+pipeline: cnn
 
 data:
   root: /kaggle/input/soil-grain-size-from-photos
-  work_root: /kaggle/working/phygrainnet
-  input_size: 192
+  cache_dir: /kaggle/working/cache        # canonical-scale PNGs, rebuilt automatically
+  scale_mode: resize                      # DEC-008; "native" if the audit shows cropped files
+  target_ppm: 10.0                        # DEC-008: 0.1 mm / px, below the lowest camera (11.49)
+  border_frac: 0.06                       # drop tray/frame edges
+  color_mode: grayworld                   # DEC-009: Motorola/Samsung (train) vs iPhone (test)
+  fields_mm: [25.6, 102.4]                # concentric physical fields per tile (multi-scale)
+  tile_px: 256
   num_workers: 2
+  n_jobs: 2
+  strict_catalog: true
+
+cv:
+  strategy: logo                          # DEC-005: leave-one-site-group-out
+  n_folds: 5
+  max_gap: 10
 
 model:
-  name: phygrainnet_v0
-  num_outputs: 11
+  name: phygrainnet_mv
+  pretrained: false                       # DEC-001: never generic-image weights
   channels: [32, 48, 96, 160, 224]
   blocks: [1, 2, 2, 3, 2]
-  dropout: 0.20
+  texture_stream: true
+  share_scales: true
+  embed_dim: 256
+  dropout: 0.2
 
 training:
-  epochs: 250
-  batch_size: 4
-  optimizer: adamw
-  learning_rate: 0.0003
-  weight_decay: 0.0001
+  epochs: 40
+  steps_per_epoch: 50
+  batch_size: 8
+  tiles_per_sample: 12
+  learning_rate: 0.001
+  weight_decay: 0.05
+  warmup_steps: 200
   gradient_clip_norm: 1.0
-  early_stopping_patience: 40
+  ema_decay: 0.995
+  mix_prob: 0.3
+  scale_jitter: 0.08
+  photometric: 1.0
+  bound_weight: 1.0
+  eval_every: 10
+  amp: true
+  full_fit: false
+  init_checkpoint: null
+  init_encoder_only: false
 
-validation:
-  strategy: group_kfold
-  folds: 5
-  primary_metric: competition_emd
+inference:
+  tta: 4
+  max_tiles_per_image: 48
+  chunk: 64
 
-notes:
-  - Dataset filenames and the official metric are locked only after P2 audit.
+output:
+  dir: /kaggle/working/outputs
+  registry: experiments/registry.csv
+  save_checkpoints: true

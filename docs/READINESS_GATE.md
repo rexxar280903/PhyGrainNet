@@ -10,9 +10,9 @@ Progress measures how much work has been completed. A gate determines whether re
 - [x] Research questions documented.
 - [x] Experiment ID convention defined.
 - [x] Kaggle selected as primary execution environment.
-- [ ] Live competition files, rules, and official metric implementation verified.
+- [x] Live competition files, rules, and official metric implementation verified (2026-10-04).
 
-Status: **IN PROGRESS**
+Status: **PASSED**
 
 ## G1 — Data Integrity
 
@@ -33,11 +33,11 @@ Status: **BLOCKED**
 
 ## G2 — Experimental Validity
 
-- [ ] Official Kaggle metric reproduced exactly.
-- [ ] Metric unit tests pass.
-- [ ] Grouped split implemented.
+- [x] Official Kaggle metric reproduced exactly (formula verified; `emd_per_sample`).
+- [x] Metric unit tests pass.
+- [x] Grouped split implemented (`site_groups`, DEC-005).
 - [ ] Zero physical-sample overlap across train/validation.
-- [ ] OOF predictions implemented.
+- [x] OOF predictions implemented (`experiment.write_outputs`).
 - [ ] Mean/median baseline established.
 - [ ] Simple neural baseline established.
 - [ ] Fold statistics recorded.
@@ -47,8 +47,8 @@ Status: **BLOCKED**
 ## G3 — Architecture Validation
 
 - [ ] PhyGrainNet trains without NaN/Inf.
-- [ ] Zero monotonicity violations.
-- [ ] Endpoint equals 100 by construction.
+- [x] Zero monotonicity violations by construction (tested).
+- [x] Endpoint equals 100 by construction (head + `make_valid`).
 - [ ] Beats statistical baseline.
 - [ ] Beats matched simple CNN.
 - [ ] Improvement appears in the majority of folds.
@@ -61,7 +61,7 @@ Status: **BLOCKED**
 
 - [ ] Final CV completed.
 - [ ] TTA and ensemble validated rather than assumed.
-- [ ] Submission schema and row mapping verified.
+- [x] Submission schema and row mapping verified in code (`validate_submission`); confirm on first upload.
 - [ ] All outputs valid.
 - [ ] Clean-session Kaggle inference is reproducible.
 - [ ] Every submission maps to experiment ID and Git commit.

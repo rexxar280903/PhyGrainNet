@@ -1,0 +1,17 @@
+# P100 - supervised pretraining on ETS (masked EMD on 0.2-63 mm + 80 um upper bound).
+experiment_id: P100
+base: ../default.yaml
+pipeline: ets_pretrain
+external:
+  ets_catalog: /kaggle/input/ets-photogranulometry-10ppm/ets_catalog.csv
+  ets_labels: /kaggle/input/ets-photogranulometry-10ppm/ets_labels_11pt.csv
+  moisture: null                # or [dry] / [humid] after checking which looks like the competition photos
+  max_images_per_sample: 6
+training:
+  init_checkpoint: /kaggle/working/outputs/P000/ssl_encoder.pt   # set null to start from random init
+  init_encoder_only: true
+ets_pretrain:
+  epochs: 30
+  steps_per_epoch: 200
+  learning_rate: 0.001
+  mix_prob: 0.2
