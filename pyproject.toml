@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phygrainnet"
-version = "0.2.0"
+version = "0.3.0"
 description = "Physical-scale-aware multi-view neural architecture for soil grain-size distribution estimation"
 requires-python = ">=3.10"
 dependencies = [
@@ -17,6 +17,7 @@ dependencies = [
   "scikit-image>=0.22",
   "scipy>=1.11",
   "opencv-python-headless>=4.8",
+  "matplotlib>=3.7",
   "joblib>=1.3",
   "openpyxl>=3.1",
 ]
