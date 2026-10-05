@@ -30,8 +30,9 @@ Format commit: `feat(data): ...`, `exp(C100): ...`, `docs(schedule): ...`, `fix(
 
 ## Minggu 1 — Sen 5 – Min 11 Okt: Audit + submission pertama (P2–P5)
 
+- 🧪 Paling cepat: import `notebooks/01_eda_first_submission.ipynb` (CPU, Internet ON) → *Save & Run All* → submit `submission.csv`. Notebook ini menjalankan sel 1–3 di bawah plus EDA (P3).
 - 🧪 Sel 1 `audit_dataset.py` → pastikan `problems` kosong. Kalau ada file yang tidak terbaca sample_id/kameranya, kirim daftar ke Claude.
-- 🧪 Sel 2 `baseline_prior.py` → **submit A000** (median training). Ini jaring pengaman.
+- 🧪 Sel 2 `baseline_prior.py` → **submit A000** (mean atau median training, dipilih lewat grouped CV). Ini jaring pengaman.
 - 🧪 Sel 3 A001 (fitur fisik + ridge/PLS/kNN, CPU) → submit model dengan CV terbaik.
 - 💬 **Posting forum #1** (draft di `docs/FORUM_POSTS.md`): umumkan pemakaian dataset ETS (CC BY 4.0) sebagai external data.
 - 💬 **Posting forum #2**: tanya host apakah foto test *tanpa label* boleh dipakai untuk self-supervised pretraining (DEC-010).

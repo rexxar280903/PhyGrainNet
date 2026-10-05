@@ -55,6 +55,16 @@ def _features_for_row(path: str, ppm: float, d: dict) -> dict:
     return image_features(img, float(d["target_ppm"]))
 
 
+def feature_cache_path(cfg: dict) -> Path:
+    """Where the per-photo feature table for these preprocessing settings is cached.
+
+    Shared by A001 and the EDA, so whichever runs first pays the extraction cost."""
+    d = cfg["data"]
+    out_dir = Path(get(cfg, "output.dir", "/kaggle/working/phygrainnet/outputs"))
+    tag = f"ppm{d['target_ppm']}_{d.get('color_mode', 'grayworld')}_b{d.get('border_frac', 0.06)}_{d.get('scale_mode', 'resize')}"
+    return out_dir / "features" / f"image_features_{tag}.csv"
+
+
 def image_feature_table(comp: Competition, cache_csv: str | Path | None = None, n_jobs: int = 2) -> pd.DataFrame:
     if cache_csv and Path(cache_csv).exists():
         cached = pd.read_csv(cache_csv)
@@ -88,8 +98,7 @@ def run_classical(cfg: dict, config_path: str = "") -> dict[str, dict]:
     comp = Competition(cfg)
     out_dir = Path(get(cfg, "output.dir", "/kaggle/working/phygrainnet/outputs"))
     d = cfg["data"]
-    tag = f"ppm{d['target_ppm']}_{d.get('color_mode', 'grayworld')}_b{d.get('border_frac', 0.06)}_{d.get('scale_mode', 'resize')}"
-    feats = image_feature_table(comp, out_dir / "features" / f"image_features_{tag}.csv", int(d.get("n_jobs", 2)))
+    feats = image_feature_table(comp, feature_cache_path(cfg), int(d.get("n_jobs", 2)))
     X = sample_features(feats, comp.train_ids)
     Xt = sample_features(feats, comp.test_ids)
     keep = np.isfinite(X).all(axis=0) & (X.std(axis=0) > 1e-9)

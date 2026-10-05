@@ -59,6 +59,7 @@ Key choices and their reasons are in [`docs/DECISIONS.md`](docs/DECISIONS.md); a
 %cd /kaggle/working/PhyGrainNet
 !pip install -q -e .
 !python scripts/audit_dataset.py                                   # P2: catalog + checks
+!python scripts/eda.py                                             # P3: figures + feature table
 !python scripts/baseline_prior.py                                  # A000: first valid submission
 !python scripts/train.py --config configs/classical/features_v1.yaml   # A001
 !python scripts/train.py --config configs/phygrainnet/mv_scratch.yaml  # C100 (GPU)
@@ -66,7 +67,7 @@ Key choices and their reasons are in [`docs/DECISIONS.md`](docs/DECISIONS.md); a
     --out /kaggle/working/submission_H001.csv
 ```
 
-Or import [`notebooks/kaggle_runner.ipynb`](notebooks/kaggle_runner.ipynb). Full command list: [`docs/KAGGLE_WORKFLOW.md`](docs/KAGGLE_WORKFLOW.md).
+Or import [`notebooks/01_eda_first_submission.ipynb`](notebooks/01_eda_first_submission.ipynb) (week 1: audit → EDA → A000/A001 → `submission.csv`, CPU only) and later [`notebooks/kaggle_runner.ipynb`](notebooks/kaggle_runner.ipynb). Full command list: [`docs/KAGGLE_WORKFLOW.md`](docs/KAGGLE_WORKFLOW.md).
 
 ## Experiment families
 
