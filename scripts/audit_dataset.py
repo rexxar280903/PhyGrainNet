@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
 from pathlib import Path
 
 import _bootstrap  # noqa: F401
@@ -45,6 +46,7 @@ def main() -> None:
         "ppm_by_camera": cat.groupby("camera")["ppm"].agg(["min", "max"]).round(3).to_dict("index"),
         "field_of_view_mm": cat.groupby("camera")[["field_w_mm", "field_h_mm"]].median().round(1).to_dict("index"),
         "labels": {
+            "non_finite": int((~np.isfinite(y)).sum()),
             "monotone_violations": int((np.diff(y, axis=1) < -1e-9).sum()),
             "out_of_range": int(((y < 0) | (y > 100)).sum()),
             "last_not_100": labels.loc[y[:, -1] != 100, "sample_id"].tolist(),
@@ -53,10 +55,30 @@ def main() -> None:
         "cv_groups": group_map,
         "problems": catalog_problems(cat, labels["sample_id"].tolist(), test_ids),
     }
+    by_hash = {}
+    for row in cat.itertuples():
+        digest = hashlib.sha256(Path(row.path).read_bytes()).hexdigest()
+        by_hash.setdefault(digest, []).append({"file": row.file, "split": row.split, "sample_id": row.sample_id})
+    report["exact_duplicates"] = [rows for rows in by_hash.values() if len(rows) > 1]
+    fatal = [p for p in report["problems"] if "without " in p or "no photos" in p]
+    if any(report["labels"][k] for k in ("non_finite", "monotone_violations", "out_of_range", "last_not_100")):
+        fatal.append("invalid training labels")
+    if labels.sample_id.duplicated().any() or len(set(test_ids)) != len(test_ids):
+        fatal.append("duplicate sample IDs")
+    if set(labels.sample_id) & set(test_ids):
+        fatal.append("train/test sample overlap")
+    if "ppm" not in cat or not np.isfinite(cat.ppm).all() or (cat.ppm <= 0).any():
+        fatal.append("invalid physical scale")
+    if any(len({(r['split'], r['sample_id']) for r in rows}) > 1 for rows in report["exact_duplicates"]):
+        fatal.append("identical image bytes across different samples or splits")
+    report["fatal_problems"] = fatal
+    report["passed"] = not fatal
     (args.out_dir / "dataset_audit.json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     print(json.dumps(report, indent=2, default=str))
     if report["problems"]:
         print("\n!! fix the problems above before training (see docs/DATASET.md)")
+    if fatal:
+        raise SystemExit("dataset audit failed: " + "; ".join(fatal))
 
 
 if __name__ == "__main__":

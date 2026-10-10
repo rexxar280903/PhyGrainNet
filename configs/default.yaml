@@ -57,5 +57,5 @@ inference:
 
 output:
   dir: /kaggle/working/outputs
-  registry: experiments/registry.csv
+  registry: /kaggle/working/registry.csv
   save_checkpoints: true

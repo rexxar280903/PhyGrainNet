@@ -13,7 +13,7 @@ Legenda: 🧪 eksperimen di Kaggle · 💬 diskusi/forum · 🐙 GitHub · 📝 
 |---|---|
 | Setiap hari kerja | Maksimal **2 submission/hari** (jatah 5), masing-masing tercatat di `docs/LEADERBOARD_LOG.md` dengan experiment ID + commit. Public LB **tidak** dipakai untuk memilih model (DEC-006). |
 | Senin & Kamis | 💬 Cek forum lomba (tab Discussion, urutkan *Recent*). Catat jawaban host yang mengubah aturan/data ke `docs/COMPETITION_RULES.md`. |
-| Minggu malam | 🐙 Review mingguan: salin baris baru `experiments/registry.csv` dari Kaggle → commit `exp(<ID>): ...`; update `project_status.json` → `python scripts/update_readiness.py`; push. |
+| Minggu malam | 🐙 Review mingguan: salin baris selesai dari `/kaggle/working/registry.csv` ke `experiments/registry.csv` → commit `exp(<ID>): ...`; update `project_status.json` → `python scripts/update_readiness.py`; push. |
 | Setiap selesai eksperimen | Simpan `metrics.json` (berisi `cv_emd`, `worst_samples`, `per_point`). Kirim ke Claude untuk dibahas bila hasilnya aneh. |
 
 Format commit: `feat(data): ...`, `exp(C100): ...`, `docs(schedule): ...`, `fix(metric): ...`.
@@ -41,7 +41,7 @@ Format commit: `feat(data): ...`, `exp(C100): ...`, `docs(schedule): ...`, `fix(
 
 ## Minggu 2 — Sen 12 – Min 18 Okt: CNN dari nol + data ETS (P6)
 
-- 🧪 C100 uji cepat: `train.py --config configs/phygrainnet/mv_scratch.yaml training.epochs=2 cv.max_folds=1` → cek waktu per epoch. Lalu jalankan penuh (±1–2 jam GPU).
+- 🧪 C100 uji cepat: `train.py --config configs/phygrainnet/kaggle_scratch.yaml experiment_id=C100_smoke training.epochs=1 training.steps_per_epoch=2 cv.max_folds=1 inference.tta=1 inference.max_tiles_per_image=4` → cek waktu dan memori. Estimasi full CV dari pengukuran ini; waktu Kaggle belum diverifikasi.
 - 🧪 C000 dan B000 (ablation sederhana) di sesi GPU yang sama bila kuota cukup (kuota GPU Kaggle ±30 jam/minggu).
 - 📝 ETS: `convert_ets_labels.py --inspect` pada Excel → pastikan 14 ayakan terdeteksi; catat apakah ada data hidrometer.
 - 🧪 ETS: transfer penuh subset terpilih (≤6 foto/sampel), `prepare_ets.py`, upload sebagai Kaggle Dataset privat `ets-photogranulometry-10ppm`.

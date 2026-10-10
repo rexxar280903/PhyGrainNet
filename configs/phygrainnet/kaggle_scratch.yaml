@@ -1,0 +1,8 @@
+# Conservative starting profile; measure GPU memory/time with a smoke run first.
+experiment_id: C100
+base: mv_scratch.yaml
+training:
+  batch_size: 2
+  tiles_per_sample: 6
+inference:
+  chunk: 16

@@ -2,6 +2,9 @@
 experiment_id: A001
 base: ../default.yaml
 pipeline: classical
+cv:
+  strategy: group_kfold
+  n_folds: 5
 classical:
   models:
     - {name: prior_median, kind: prior_median}

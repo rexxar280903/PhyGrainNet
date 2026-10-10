@@ -81,8 +81,11 @@ def canonical_image(
     return normalize_color(img, color_mode)
 
 
-def cache_path(cache_dir: str | Path, path: str | Path, target_ppm: float, border_frac: float, color_mode: str) -> Path:
-    key = f"{Path(path).name}|{target_ppm}|{border_frac}|{color_mode}"
+def cache_path(cache_dir: str | Path, path: str | Path, target_ppm: float, border_frac: float, color_mode: str,
+               ppm: float | None = None) -> Path:
+    source = Path(path).resolve()
+    stat = source.stat()
+    key = f"{source}|{stat.st_size}|{stat.st_mtime_ns}|{ppm}|{target_ppm}|{border_frac}|{color_mode}"
     h = hashlib.md5(key.encode("utf-8")).hexdigest()[:12]
     return Path(cache_dir) / f"{h}.png"
 
@@ -97,7 +100,7 @@ def canonical_image_cached(
 ) -> np.ndarray:
     if cache_dir is None:
         return canonical_image(path, ppm, target_ppm, border_frac, color_mode)
-    cp = cache_path(cache_dir, path, target_ppm, border_frac, color_mode)
+    cp = cache_path(cache_dir, path, target_ppm, border_frac, color_mode, ppm)
     if cp.exists():
         return np.asarray(Image.open(cp).convert("RGB"))
     img = canonical_image(path, ppm, target_ppm, border_frac, color_mode)

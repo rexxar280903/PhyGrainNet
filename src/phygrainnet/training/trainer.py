@@ -122,7 +122,8 @@ def train_model(
         shuffle=False,
         num_workers=int(cfg["data"].get("num_workers", 2)),
         drop_last=True,
-        persistent_workers=int(cfg["data"].get("num_workers", 2)) > 0,
+        # Recreate workers so set_epoch() reaches their dataset copies.
+        persistent_workers=False,
     )
     epochs = int(t["epochs"])
     total = epochs * len(dl)
@@ -150,6 +151,8 @@ def train_model(
                 batch["finest_index"].to(device),
                 bound_weight=float(t.get("bound_weight", 1.0)),
             )
+            if not torch.isfinite(loss):
+                raise FloatingPointError(f"non-finite training loss at epoch {epoch + 1}")
             opt.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
             scaler.unscale_(opt)

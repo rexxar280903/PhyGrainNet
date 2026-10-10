@@ -4,7 +4,7 @@
         --data-root /kaggle/input/soil-grain-size-from-photos --out submission_H001.csv
 
 Every run directory needs oof.csv and test.csv (written by scripts/train.py).
-Only samples present in every run's OOF are used for selection.
+Full OOF coverage is required; smoke runs cannot be used for selection.
 """
 from __future__ import annotations
 
@@ -36,7 +36,14 @@ def main() -> None:
     test_ids = load_test_ids(args.data_root)
     oofs, tests = {}, {}
     for r in args.runs:
+        meta_path = r / "metrics.json"
+        if meta_path.exists() and not json.loads(meta_path.read_text()).get("cv_complete", True):
+            raise ValueError(f"{r}: incomplete CV; finish all folds before ensembling")
+        if r.name in oofs:
+            raise ValueError(f"duplicate run name: {r.name}")
         oofs[r.name] = read_prediction_csv(r / "oof.csv").set_index("sample_id")
+        if oofs[r.name].index.has_duplicates or set(oofs[r.name].index) != set(labels.index):
+            raise ValueError(f"{r}: OOF must cover every training sample exactly once")
         tests[r.name] = read_prediction_csv(r / "test.csv").set_index("sample_id").loc[test_ids]
     common = sorted(set.intersection(*[set(o.index) for o in oofs.values()]))
     y = label_matrix(labels.loc[common].reset_index())

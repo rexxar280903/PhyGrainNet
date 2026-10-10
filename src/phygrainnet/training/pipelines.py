@@ -32,14 +32,30 @@ class Competition:
         problems = catalog_problems(self.catalog, self.train_ids, self.test_ids)
         for p in problems:
             print(f"[catalog] WARNING: {p}")
-        if any("without sample_id" in p or "no photos" in p for p in problems) and d.get("strict_catalog", True):
+        if any("without " in p or "no photos" in p for p in problems) and d.get("strict_catalog", True):
             raise RuntimeError("catalog problems: " + "; ".join(problems))
+        if "ppm" not in self.catalog or not np.isfinite(self.catalog.ppm).all() or (self.catalog.ppm <= 0).any():
+            raise ValueError("invalid physical scale; run the dataset audit")
         self.y = label_matrix(self.labels)
+        if (not np.isfinite(self.y).all() or np.any((self.y < 0) | (self.y > 100))
+                or np.any(np.diff(self.y, axis=1) < 0) or np.any(self.y[:, -1] != 100)):
+            raise ValueError("invalid training labels; run the dataset audit")
+        if len(set(self.train_ids)) != len(self.train_ids) or len(set(self.test_ids)) != len(self.test_ids):
+            raise ValueError("duplicate sample IDs")
+        if set(self.train_ids) & set(self.test_ids):
+            raise ValueError("train/test sample overlap")
         cv = cfg.get("cv", {})
         self.groups, self.folds = make_folds(
             self.train_ids, cv.get("strategy", "logo"), int(cv.get("n_folds", 5)), int(cfg.get("seed", 42)),
             int(cv.get("max_gap", 10)),
         )
+        for trn, val in self.folds:
+            if not len(trn) or not len(val) or set(self.groups[trn]) & set(self.groups[val]):
+                raise ValueError("invalid grouped CV fold")
+
+    def fold_splits(self) -> list[dict]:
+        return [{"fold": k, "train_ids": [self.train_ids[i] for i in trn],
+                 "val_ids": [self.train_ids[i] for i in val]} for k, (trn, val) in enumerate(self.folds)]
 
     def canonical(self, row) -> np.ndarray:
         d = self.cfg["data"]
@@ -104,7 +120,8 @@ def run_classical(cfg: dict, config_path: str = "") -> dict[str, dict]:
         test_pred = build_classical(spec).fit(X, comp.y).predict(Xt)
         exp_id = f"{cfg.get('experiment_id', 'A')}_{name}"
         summary = write_outputs(out_dir, exp_id, comp.train_ids, comp.y, make_valid(oof), comp.groups,
-                                comp.test_ids, make_valid(test_pred), cfg, {"n_features": int(X.shape[1])})
+                                comp.test_ids, make_valid(test_pred), cfg,
+                                {"n_features": int(X.shape[1]), "fold_splits": comp.fold_splits()})
         append_registry(get(cfg, "output.registry", out_dir / "registry.csv"),
                         registry_row(exp_id, spec["kind"], config_path, int(cfg.get("seed", 42)), summary,
                                      (time.time() - t0) / 60, notes=f"features={X.shape[1]}"))
@@ -144,6 +161,8 @@ def run_cnn(cfg: dict, config_path: str = "") -> dict:
     fold_test = []
     histories = {}
     fold_limit = get(cfg, "cv.max_folds")
+    if fold_limit is not None and int(fold_limit) < 1:
+        raise ValueError("cv.max_folds must be at least 1")
     for k, (trn, val) in enumerate(comp.folds):
         if fold_limit is not None and k >= int(fold_limit):
             break
@@ -168,7 +187,10 @@ def run_cnn(cfg: dict, config_path: str = "") -> dict:
     done = [i for k, (_, val) in enumerate(comp.folds) if fold_limit is None or k < int(fold_limit) for i in val]
     done = np.array(sorted(done))
     summary = write_outputs(out_dir, exp_id, [comp.train_ids[i] for i in done], comp.y[done], make_valid(oof[done]),
-                            comp.groups[done], comp.test_ids, make_valid(test_pred), cfg, {"history": histories})
+                            comp.groups[done], comp.test_ids, make_valid(test_pred), cfg,
+                            {"history": histories, "cv_complete": len(done) == len(comp.train_ids),
+                             "n_train": len(comp.train_ids), "fold_splits": comp.fold_splits(),
+                             "completed_folds": [k for k in histories if isinstance(k, int)]})
     from phygrainnet.models.phygrainnet import build_model
 
     n_params = sum(p.numel() for p in build_model(cfg).parameters())

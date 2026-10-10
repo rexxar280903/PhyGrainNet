@@ -54,7 +54,7 @@ def pretrain_simclr(
     ds = UnlabeledTileDataset(images, fields_px(cfg), int(s.get("tile_px", cfg["data"]["tile_px"])),
                               int(s["steps_per_epoch"]) * int(s["batch_size"]), seed=int(cfg.get("seed", 42)))
     nw = int(cfg["data"].get("num_workers", 2))
-    dl = DataLoader(ds, batch_size=int(s["batch_size"]), num_workers=nw, drop_last=True, persistent_workers=nw > 0)
+    dl = DataLoader(ds, batch_size=int(s["batch_size"]), num_workers=nw, drop_last=True, persistent_workers=False)
     epochs = int(s["epochs"])
     opt = torch.optim.AdamW(model.parameters(), lr=float(s.get("learning_rate", 1e-3)), weight_decay=float(s.get("weight_decay", 1e-4)))
     total = epochs * len(dl)
@@ -73,6 +73,8 @@ def pretrain_simclr(
             with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=use_amp):
                 z1, z2 = model(v1), model(v2)
             loss = nt_xent(z1.float(), z2.float(), float(s.get("temperature", 0.2)))
+            if not torch.isfinite(loss):
+                raise FloatingPointError(f"non-finite SSL loss at epoch {epoch + 1}")
             opt.zero_grad(set_to_none=True)
             scaler.scale(loss).backward()
             scaler.step(opt)

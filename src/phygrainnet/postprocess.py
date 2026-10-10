@@ -14,7 +14,8 @@ def make_valid(pred: np.ndarray, decimals: int = 4) -> np.ndarray:
     p = np.asarray(pred, dtype=np.float64).copy()
     if p.ndim == 1:
         p = p[None, :]
-    p = np.nan_to_num(p, nan=0.0, posinf=100.0, neginf=0.0)
+    if not np.isfinite(p).all():
+        raise ValueError("non-finite predictions; fix the model before postprocessing")
     p = np.clip(p, 0.0, 100.0)
     p = np.round(p, decimals)
     p = np.maximum.accumulate(p, axis=1)

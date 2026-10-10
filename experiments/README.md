@@ -1,6 +1,6 @@
 # Experiment Registry
 
-`registry.csv` gets one row per run from `scripts/train.py` (written on Kaggle; copy new rows back here and commit as `exp(<ID>): ...`).
+`/kaggle/working/registry.csv` gets rows from supervised training and A000 baseline runs. Copy completed rows here and commit as `exp(<ID>): ...`. Partial neural CV uses status `smoke_only`; exclude those rows from model selection. SSL/ETS pretraining stores config/history in its checkpoints.
 
 | Family | Meaning | Configs |
 |---|---|---|

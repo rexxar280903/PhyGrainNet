@@ -61,12 +61,15 @@ Key choices and their reasons are in [`docs/DECISIONS.md`](docs/DECISIONS.md); a
 !python scripts/audit_dataset.py                                   # P2: catalog + checks
 !python scripts/baseline_prior.py                                  # A000: first valid submission
 !python scripts/train.py --config configs/classical/features_v1.yaml   # A001
-!python scripts/train.py --config configs/phygrainnet/mv_scratch.yaml  # C100 (GPU)
+!python scripts/train.py --config configs/phygrainnet/kaggle_scratch.yaml experiment_id=C100_smoke training.epochs=1 training.steps_per_epoch=2 cv.max_folds=1 inference.tta=1 inference.max_tiles_per_image=4  # GPU smoke test
+!python scripts/train.py --config configs/phygrainnet/kaggle_scratch.yaml  # C100 full CV, after reviewing audit/smoke
 !python scripts/ensemble.py --runs /kaggle/working/outputs/A001_ridge10 /kaggle/working/outputs/C100 \
     --out /kaggle/working/submission_H001.csv
 ```
 
 Or import [`notebooks/kaggle_runner.ipynb`](notebooks/kaggle_runner.ipynb). Full command list: [`docs/KAGGLE_WORKFLOW.md`](docs/KAGGLE_WORKFLOW.md).
+
+The notebook defaults to audit, baseline, GPU smoke test and a verified results archive. Enable full CV and external pretraining explicitly after the first checks pass. Use a GitHub branch/commit containing the reviewed code. The latest local readiness audit is in [`docs/KAGGLE_READINESS_REVIEW.md`](docs/KAGGLE_READINESS_REVIEW.md).
 
 ## Experiment families
 
@@ -80,7 +83,7 @@ Or import [`notebooks/kaggle_runner.ipynb`](notebooks/kaggle_runner.ipynb). Full
 | H | ensembles |
 | P | pretraining runs |
 
-Every run writes `oof.csv`, `test.csv`, `metrics.json` and a row in `experiments/registry.csv`.
+Every supervised run writes OOF/test curves, targets, groups, metrics, resolved configuration and environment details, plus a row in `/kaggle/working/registry.csv`; copy completed rows to `experiments/registry.csv`. Pretraining saves weights/config/history. Export results with `scripts/export_results.py`, persist a successful Kaggle version, and restore supervised checkpoints with `scripts/predict.py` to verify inference without retraining.
 
 ## Repository layout
 

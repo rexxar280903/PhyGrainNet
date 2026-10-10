@@ -4,6 +4,8 @@ from __future__ import annotations
 import csv
 import datetime as dt
 import json
+import platform
+import importlib.metadata
 import subprocess
 from pathlib import Path
 
@@ -45,6 +47,7 @@ def summarize_oof(ids: list[str], y: np.ndarray, oof: np.ndarray, groups: np.nda
         "worst_samples": {ids[i]: float(per[i]) for i in np.argsort(-per)[:5]},
         "per_point": {c: float(v) for c, v in zip(TARGET_COLUMNS[:-1], per_point_contribution(y, oof))},
         "per_sample": {i: float(v) for i, v in zip(ids, per)},
+        "per_group": {str(k): float(v) for k, v in by_group.items()},
     }
 
 
@@ -64,12 +67,24 @@ def write_outputs(
     out.mkdir(parents=True, exist_ok=True)
     curves_frame(train_ids, oof).to_csv(out / "oof.csv", index=False)
     curves_frame(test_ids, test_pred).to_csv(out / "test.csv", index=False)
+    curves_frame(train_ids, y).to_csv(out / "targets.csv", index=False)
+    pd.DataFrame({"sample_id": train_ids, "group": groups}).to_csv(out / "groups.csv", index=False)
     summary = summarize_oof(train_ids, y, oof, groups)
     summary.update(extra or {})
     summary["experiment_id"] = exp_id
     summary["git_commit"] = git_commit()
+    summary.setdefault("cv_complete", True)
+    summary["n_oof"] = len(train_ids)
     (out / "metrics.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     (out / "config.json").write_text(json.dumps(cfg, indent=2, default=str), encoding="utf-8")
+    packages = {}
+    for name in ("numpy", "pandas", "torch", "scikit-learn", "scikit-image", "opencv-python-headless", "PyYAML"):
+        try:
+            packages[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            packages[name] = "unavailable"
+    (out / "environment.json").write_text(json.dumps({"python": platform.python_version(),
+        "platform": platform.platform(), "packages": packages}, indent=2), encoding="utf-8")
     return summary
 
 
@@ -99,6 +114,6 @@ def registry_row(exp_id: str, architecture: str, config_path: str, seed: int, su
         "parameters": parameters,
         "runtime_min": round(runtime_min, 2),
         "git_commit": summary.get("git_commit", git_commit()),
-        "status": "done",
+        "status": "done" if summary.get("cv_complete", True) else "smoke_only",
         "notes": notes,
     }
