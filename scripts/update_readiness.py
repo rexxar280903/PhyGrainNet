@@ -24,6 +24,9 @@ def render(s: dict) -> str:
     lb = s.get("best_public_score")
     lines = [
         START,
+        f"**Local development release: {s.get('software_release', {}).get('completion_percent', 0)}%**",
+        "Implementation, interactive portal and research tools; separate from Kaggle evidence.",
+        "",
         f"**Overall project progress: {s['overall_progress_percent']}%**  ",
         f"`{bar(s['overall_progress_percent'])} {s['overall_progress_percent']}%`",
         "",

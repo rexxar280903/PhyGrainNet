@@ -22,7 +22,7 @@ def export_results(work_root: Path, repo: Path, out: Path) -> dict:
             files[path.name] = path
     if (work_root / "registry.csv").exists():
         files["registry.csv"] = work_root / "registry.csv"
-    for folder in ("src", "scripts", "configs", "notebooks"):
+    for folder in ("src", "scripts", "configs", "notebooks", "web", "docs"):
         for path in (repo / folder).rglob("*"):
             if path.is_file() and "__pycache__" not in path.parts:
                 files["source/" + str(path.relative_to(repo)).replace("\\", "/")] = path

@@ -78,15 +78,18 @@ class GrainEncoder(nn.Module):
 class AttentionPool(nn.Module):
     """Aggregate a variable number of tile embeddings into one sample embedding."""
 
-    def __init__(self, dim: int, hidden: int = 128) -> None:
+    def __init__(self, dim: int, hidden: int = 128, use_attention: bool = True) -> None:
         super().__init__()
         self.score = nn.Sequential(nn.Linear(dim, hidden), nn.Tanh(), nn.Linear(hidden, 1))
         self.out_dim = dim * 3
+        self.use_attention = use_attention
 
     def forward(self, e: torch.Tensor, mask: torch.Tensor | None = None) -> torch.Tensor:
         # e: (B, T, D); mask: (B, T) 1 = valid
         if mask is None:
             mask = torch.ones(e.shape[:2], device=e.device, dtype=e.dtype)
+        if not torch.all(mask.sum(dim=1) > 0):
+            raise ValueError("every sample must contain at least one valid tile")
         mask = mask.to(e.dtype)
         s = self.score(e).squeeze(-1).masked_fill(mask == 0, float("-inf"))
         a = torch.softmax(s, dim=1).unsqueeze(-1)
@@ -94,7 +97,8 @@ class AttentionPool(nn.Module):
         n = mask.sum(dim=1, keepdim=True).clamp(min=1)
         mean = (e * mask.unsqueeze(-1)).sum(dim=1) / n
         var = (((e - mean.unsqueeze(1)) ** 2) * mask.unsqueeze(-1)).sum(dim=1) / n
-        return torch.cat([mean, var.clamp(min=0).sqrt(), attn], dim=1)
+        # Avoid an infinite sqrt derivative when a sample has only one tile.
+        return torch.cat([mean, var.clamp(min=1e-8).sqrt(), attn if self.use_attention else mean], dim=1)
 
 
 class PhyGrainNetMV(nn.Module):
@@ -116,6 +120,7 @@ class PhyGrainNetMV(nn.Module):
         embed_dim: int = 256,
         dropout: float = 0.2,
         num_bins: int = 11,
+        attention_pool: bool = True,
     ) -> None:
         super().__init__()
         self.num_scales = num_scales
@@ -128,7 +133,7 @@ class PhyGrainNetMV(nn.Module):
         self.tile_proj = nn.Sequential(
             nn.Linear(enc_dim * num_scales, embed_dim), nn.GELU(), nn.LayerNorm(embed_dim)
         )
-        self.pool = AttentionPool(embed_dim)
+        self.pool = AttentionPool(embed_dim, use_attention=attention_pool)
         self.mlp = nn.Sequential(
             nn.Dropout(dropout), nn.Linear(self.pool.out_dim, embed_dim), nn.GELU(), nn.Dropout(dropout)
         )
@@ -218,5 +223,6 @@ def build_model(cfg: dict) -> nn.Module:
             share_scales=bool(m.get("share_scales", True)),
             embed_dim=int(m.get("embed_dim", 256)),
             dropout=float(m.get("dropout", 0.2)),
+            attention_pool=bool(m.get("attention_pool", True)),
         )
     raise ValueError(f"unknown model {name!r}")

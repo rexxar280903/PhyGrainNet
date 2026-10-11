@@ -1,0 +1,5 @@
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F107
+model:
+  attention_pool: false
+notes_short: replace attention statistic with mean; retain output dimension

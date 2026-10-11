@@ -144,6 +144,9 @@ def run_cnn(cfg: dict, config_path: str = "") -> dict:
     out_dir = Path(get(cfg, "output.dir", "/kaggle/working/phygrainnet/outputs"))
     exp_id = cfg.get("experiment_id", "C000")
     device = device_auto()
+    if not d.get("canonical_scale", True):
+        # Force resampling ratio to 1; log this as an uncalibrated pixel ablation.
+        comp.catalog["ppm"] = float(d["target_ppm"])
     rec_args = dict(target_ppm=float(d["target_ppm"]), border_frac=float(d.get("border_frac", 0.06)),
                     color_mode=d.get("color_mode", "grayworld"), cache_dir=d.get("cache_dir"))
     train_recs = records_from_catalog(comp.catalog[comp.catalog.split == "train"], comp.labels,

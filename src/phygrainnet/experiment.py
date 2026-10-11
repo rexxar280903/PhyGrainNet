@@ -6,6 +6,7 @@ import datetime as dt
 import json
 import platform
 import importlib.metadata
+import hashlib
 import subprocess
 from pathlib import Path
 
@@ -27,6 +28,26 @@ def git_commit(short: bool = True) -> str:
         return subprocess.check_output(args, stderr=subprocess.DEVNULL, text=True).strip()
     except Exception:
         return "unknown"
+
+
+def source_provenance() -> dict:
+    root = Path(__file__).resolve().parents[2]
+    manifest = root / "source_manifest.json"
+    result = {"source_manifest_sha256": None, "source_manifest_matches": None}
+    if manifest.exists():
+        payload = manifest.read_bytes()
+        result["source_manifest_sha256"] = hashlib.sha256(payload).hexdigest()
+        entries = json.loads(payload)["files"]
+        result["source_manifest_matches"] = all(
+            (root / name).resolve().is_relative_to(root.resolve()) and (root / name).is_file()
+            and hashlib.sha256((root / name).read_bytes()).hexdigest() == info["sha256"]
+            for name, info in entries.items())
+    try:
+        result["working_tree_dirty"] = bool(subprocess.check_output(
+            ["git", "status", "--porcelain"], cwd=root, stderr=subprocess.DEVNULL, text=True).strip())
+    except (OSError, subprocess.CalledProcessError):
+        result["working_tree_dirty"] = None
+    return result
 
 
 def curves_frame(ids: list[str], curves: np.ndarray) -> pd.DataFrame:
@@ -73,6 +94,7 @@ def write_outputs(
     summary.update(extra or {})
     summary["experiment_id"] = exp_id
     summary["git_commit"] = git_commit()
+    summary.update(source_provenance())
     summary.setdefault("cv_complete", True)
     summary["n_oof"] = len(train_ids)
     (out / "metrics.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -83,8 +105,9 @@ def write_outputs(
             packages[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
             packages[name] = "unavailable"
+    from phygrainnet.profiling import hardware_info
     (out / "environment.json").write_text(json.dumps({"python": platform.python_version(),
-        "platform": platform.platform(), "packages": packages}, indent=2), encoding="utf-8")
+        "platform": platform.platform(), "packages": packages, "hardware": hardware_info()}, indent=2), encoding="utf-8")
     return summary
 
 

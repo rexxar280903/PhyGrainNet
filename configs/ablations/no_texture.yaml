@@ -1,0 +1,6 @@
+# F101: remove analytic texture channels; same folds and schedule.
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F101
+model:
+  texture_stream: false
+notes_short: texture_stream=false; matched C100

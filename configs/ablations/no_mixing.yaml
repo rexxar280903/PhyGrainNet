@@ -1,0 +1,5 @@
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F104
+training:
+  mix_prob: 0.0
+notes_short: without virtual tile mixing

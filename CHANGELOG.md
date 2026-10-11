@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — 2026-10-10
+
+- Indonesian offline interactive dashboard and methods paper, generated from repository status/config/profile.
+- Partial MAC profiling, GPU environment capture and synthetic training benchmark.
+- Complete grouped-OOF research reports, site-cluster bootstrap, fraction/diameter diagnostics and paired comparisons.
+- Seven controlled ablation configs; one-tile gradient stability and empty-mask validation.
+- Kaggle profiler/report steps and loader-inclusive training timing; archives include portal/docs.
+- Scientific readiness remains evidence-based; software release completion is tracked separately.
+
 ## 0.2.0 — Competition pipeline (2026-10-04)
 
 - Verified competition facts (metric, files, cameras, rules, deadline 2026-11-30 18:00 WIB) and recorded them in `docs/`.

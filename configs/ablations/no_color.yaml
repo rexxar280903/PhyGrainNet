@@ -1,0 +1,5 @@
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F105
+data:
+  color_mode: none
+notes_short: without gray-world white balance

@@ -1,0 +1,5 @@
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F102
+data:
+  fields_mm: [25.6]
+notes_short: one physical scale; report compute difference

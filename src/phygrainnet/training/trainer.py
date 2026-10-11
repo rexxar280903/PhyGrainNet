@@ -138,6 +138,8 @@ def train_model(
     for epoch in range(epochs):
         ds.set_epoch(epoch)
         model.train()
+        if device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats()
         t0, losses = time.time(), []
         for batch in dl:
             x = batch["x"].to(device, non_blocking=True)
@@ -163,7 +165,13 @@ def train_model(
             if ema is not None:
                 ema.update(model)
             losses.append(float(loss.detach()))
-        rec = {"epoch": epoch, "train_loss": float(np.mean(losses)), "sec": time.time() - t0}
+        if device.type == "cuda":
+            torch.cuda.synchronize()
+        train_sec = time.time() - t0
+        rec = {"epoch": epoch, "train_loss": float(np.mean(losses)), "sec": train_sec,
+               "seconds_per_step": train_sec / max(1, len(dl)), "learning_rate": float(opt.param_groups[0]["lr"])}
+        if device.type == "cuda":
+            rec["peak_allocated_mib"] = torch.cuda.max_memory_allocated() / 2**20
         if val_records and ((epoch + 1) % eval_every == 0 or epoch == epochs - 1):
             from phygrainnet.metrics.kaggle_emd import emd_per_sample
 
@@ -195,6 +203,11 @@ def predict_records(
     preds = []
     for rec in records:
         tiles = inference_tiles(rec, fields_px(cfg), int(cfg["data"]["tile_px"]), int(inf.get("max_tiles_per_image", 48)))
+        if inf.get("max_tiles_per_sample") is not None:
+            limit = int(inf["max_tiles_per_sample"])
+            if limit < 1:
+                raise ValueError("max_tiles_per_sample must be positive")
+            tiles = tiles[:limit]
         outs = []
         for k in range(max(1, tta)):
             tt = torch.rot90(tiles, k % 4, dims=(-2, -1))

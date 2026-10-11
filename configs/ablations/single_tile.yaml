@@ -1,0 +1,8 @@
+# One tile reduces both evidence and compute; not a parameter-matched baseline.
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F103
+training:
+  tiles_per_sample: 1
+inference:
+  max_tiles_per_sample: 1
+notes_short: one tile per sample; reduced evidence and compute

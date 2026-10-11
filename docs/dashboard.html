@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Dashboard pembelajaran PhyGrainNet: alur data, arsitektur, biaya komputasi dan bukti eksperimen."><title>PhyGrainNet · Research dashboard</title><style>
+/* No remote fonts or CDN dependencies; usable offline. */
+:root{color-scheme:light;--ink:#182b2a;--muted:#596d69;--paper:#f5f6f1;--surface:#fff;--line:#dce3dc;--green:#12654f;--lime:#dbeebc;--orange:#ad581c;--blue:#31668c;--purple:#7363a3;--shadow:0 8px 28px #193a2710;font-family:Inter,Segoe UI,Arial,sans-serif;font-size:15px}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);line-height:1.65}button,input,select{font:inherit}button,a,input,select{touch-action:manipulation}a{color:var(--green);text-underline-offset:3px}button,.action{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:9px 14px;cursor:pointer}button:hover,.action:hover{border-color:var(--green);background:#edf5e8}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #d48531;outline-offset:3px}.primary{background:var(--green);color:white;border-color:var(--green)}.primary:hover{background:#0b4d3c;color:white}.skip{position:absolute;top:-60px;left:10px;background:white;padding:10px;z-index:20}.skip:focus{top:10px}
+.layout{display:grid;grid-template-columns:235px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;padding:28px 22px;border-right:1px solid var(--line);background:#eff2ea;display:flex;flex-direction:column;gap:25px}.brand{font-size:20px;letter-spacing:-.6px;font-weight:750;text-decoration:none;display:flex;align-items:center;gap:10px}.brandmark{width:29px;height:29px;background:var(--green);border-radius:50% 50% 12% 50%;box-shadow:inset -8px -8px #a6c789}.eyebrow{font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}.side-title{font-size:12px;color:var(--muted);margin-bottom:8px}.sidebar nav{display:grid;gap:3px}.sidebar nav a{text-decoration:none;color:var(--muted);padding:9px 12px;border-radius:8px;display:flex;gap:12px;font-size:13px}.sidebar nav a:hover,.sidebar nav a.active{background:#dce9d5;color:var(--green)}.sidebar nav a span{color:#80967d;font-variant-numeric:tabular-nums;font-size:11px;padding-top:2px}.side-bottom{margin-top:auto;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}.main{min-width:0;padding:0 42px 70px;max-width:1500px;width:100%;margin:auto}.topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;border-bottom:1px solid var(--line);padding:20px 0;font-size:12px;color:var(--muted)}.topbar .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.topbar a{text-decoration:none}.hero{padding:38px 0 28px;display:grid;grid-template-columns:1fr auto;gap:25px;align-items:center}h1{font-size:clamp(30px,3vw,48px);line-height:1.12;letter-spacing:-1.6px;margin:12px 0 18px;max-width:860px}h2{font-size:26px;letter-spacing:-.7px;line-height:1.25;margin:0 0 10px}h3{font-size:17px;line-height:1.4;margin:0 0 9px}h4{font-size:14px;margin:16px 0 6px}p{margin:0 0 14px}.lead{color:var(--muted);max-width:780px;font-size:16px}.hero-orbit{width:132px;height:132px;border:1px solid #b5ccab;border-radius:50%;display:grid;place-items:center;position:relative}.hero-orbit:before{content:'';position:absolute;inset:17px;border:1px dashed #9bbe89;border-radius:50%}.hero-orbit strong{font-size:33px;color:var(--green);line-height:1}.hero-orbit small{display:block;font-size:11px;text-align:center}.notice{border-left:3px solid var(--orange);padding:12px 17px;background:#fff6e8;color:#68431f;font-size:13px;margin-bottom:26px}.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;background:#e7eedf;color:var(--green)}.badge.pending{background:#fff1dc;color:#855b29}.badge.demo{background:#eaf0f7;color:var(--blue)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}.stat{padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px}.stat-label{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:30px;letter-spacing:-.8px;line-height:1.5}.stat small{font-size:11px;color:var(--muted)}.section{scroll-margin-top:18px;margin:36px 0 0;padding-top:30px;border-top:1px solid var(--line)}.section-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}.section-head p{font-size:13px;color:var(--muted);max-width:780px}.panel{background:var(--surface);border:1px solid var(--line);padding:24px;border-radius:13px;min-width:0;box-shadow:var(--shadow)}.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.plain-list{padding-left:19px;font-size:14px}.plain-list li{margin-bottom:8px}.muted{color:var(--muted)}.small{font-size:12px}.mono,code,pre{font-family:Consolas,Cascadia Mono,monospace;font-size:12px}code{background:#edf0e8;border-radius:4px;padding:2px 5px;overflow-wrap:anywhere}pre{background:#172d2a;color:#def0d8;border-radius:9px;padding:18px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}pre code{padding:0;background:none;color:inherit}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th{text-align:left;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);background:#f0f3ec}td,th{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:last-child td{border-bottom:0}caption{text-align:left;font-size:12px;margin-bottom:10px;color:var(--muted)}.progress{height:6px;background:#e9eee2;border-radius:5px;overflow:hidden;margin:10px 0}.progress span{display:block;height:100%;background:var(--green)}.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:13px;margin:18px 0 22px}.flow button{position:relative;text-align:left;min-height:110px;border-color:#d5ddcc;padding:15px 12px}.flow button:not(:last-child):after{content:'→';position:absolute;right:-14px;top:40px;color:#92a08e;z-index:1}.flow button[aria-pressed=true]{background:var(--green);color:#fff;border-color:var(--green)}.flow .step-num{display:block;font-size:11px;opacity:.7}.flow strong{font-size:13px;display:block;margin:8px 0}.flow small{font-size:10px;line-height:1.5;display:block;opacity:.8}.flow-detail{display:grid;grid-template-columns:1fr 1fr;gap:20px}.io{border-left:2px solid #afc795;padding-left:15px}.io strong{display:block;color:var(--green);font-size:12px}.io p{font-size:13px;margin-top:6px}.shape-track{display:grid;gap:9px}.shape-row{display:grid;grid-template-columns:100px 1fr auto;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:9px 0;font-size:12px}.shape-row span:nth-child(2){height:18px;background:#b2cda0;border-radius:3px;min-width:12px}.shape-row code{font-size:11px}.term{display:inline;border:0;border-bottom:1px dotted var(--green);border-radius:0;background:none;color:inherit;padding:0 1px;line-height:inherit;font:inherit;cursor:help}.term:hover{background:#e7efdd}.term-tip{position:fixed;z-index:99;max-width:330px;width:max-content;background:#183c31;color:white;border-radius:8px;padding:12px 16px;font-size:13px;box-shadow:0 6px 24px #0003;pointer-events:none;line-height:1.6}.term-tip[hidden]{display:none}.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}label{display:block;font-size:12px;color:var(--muted)}label input:not([type=checkbox]),label select{display:block;width:100%;margin-top:7px;border:1px solid var(--line);background:#f7f8f3;border-radius:7px;padding:8px;color:var(--ink)}input[type=range]{accent-color:var(--green);padding:0!important;background:none!important}.control-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:14px 0}.result-line{padding:14px 0;margin-top:14px;border-top:1px solid var(--line);color:var(--green);font-weight:650}.chart{width:100%;height:auto;display:block;min-height:220px}.chart text{font:12px Segoe UI,Arial,sans-serif;fill:var(--muted)}.chart .axis{stroke:#ccd7c8;stroke-width:1}.chart .target{stroke:var(--green);fill:none;stroke-width:3}.chart .prediction{stroke:var(--orange);fill:none;stroke-width:2.5;stroke-dasharray:6 4}.legend{display:flex;flex-wrap:wrap;gap:20px;font-size:12px}.legend span:before{content:'';display:inline-block;width:16px;height:3px;background:var(--green);margin:0 7px 3px 0}.legend span:nth-child(2):before{background:var(--orange)}.mass-controls{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:7px;margin:14px 0}.mass-controls input{width:100%;padding:5px!important;font-size:11px}.mass-controls label{text-align:center;font-size:9px;color:var(--muted)}.fraction-bar{display:flex;min-height:30px;overflow:hidden;border-radius:6px;margin:14px 0}.fraction-bar span{display:grid;place-items:center;font-size:11px;color:#fff}.fraction-bar span:nth-child(1){background:var(--purple)}.fraction-bar span:nth-child(2){background:var(--blue)}.fraction-bar span:nth-child(3){background:var(--orange)}.fraction-bar span:nth-child(4){background:var(--green)}.roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.roadmap article{border-top:3px solid #bad3a6;padding:17px 0}.roadmap article.pending{border-color:#e2c191}.roadmap h3{font-size:14px}.equation{font-family:Cambria,Georgia,serif;font-size:20px;line-height:1.8;padding:16px 20px;background:#eef3e7;border-radius:8px;margin:16px 0;overflow-wrap:anywhere}.equation .number{float:right;font:11px Segoe UI,sans-serif;color:var(--muted)}.caption{font-size:12px;color:var(--muted);margin-top:10px}.glossary{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.glossary article{border-bottom:1px solid var(--line);padding:10px 0}.glossary h3{font-size:14px}.glossary p{font-size:12px;color:var(--muted);margin:0}.search{width:100%;max-width:420px;padding:11px 14px;border-radius:8px;border:1px solid var(--line);margin:10px 0 16px}.file-input{display:block;padding:12px;border:1px dashed #bacbb2;border-radius:8px;width:100%;font-size:12px}.paper .main{max-width:1170px}.paper h1{font-family:Georgia,Cambria,serif;letter-spacing:-1.3px;font-size:43px}.paper .article-body p{font-size:14px;line-height:1.9}.paper .article-body h3{margin-top:25px}.paper .hero{grid-template-columns:1fr}.paper .abstract{background:#edf2e7;border-top:3px solid var(--green);padding:23px 28px}.paper .section{padding-top:28px;margin-top:35px}.references li{margin:10px 0;font-size:12px;overflow-wrap:anywhere}.footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}[hidden]{display:none!important}.error{color:#a03921}.result-chart{margin-top:20px}details{margin:12px 0;border-top:1px solid var(--line);padding:12px 0}summary{cursor:pointer;font-weight:600;font-size:13px}.mobile-brand{display:none}
+@media(max-width:1150px){.main{padding:0 25px 50px}.layout{grid-template-columns:205px 1fr}.sidebar{padding:24px 15px}.flow{grid-template-columns:repeat(3,1fr)}.flow button:nth-child(3):after{content:none}.stats{gap:9px}.stat{padding:16px}.stat strong{font-size:26px}.grid2{grid-template-columns:1fr}.shape-row{grid-template-columns:95px 1fr auto}}
+@media(max-width:760px){.layout{display:block}.sidebar{position:static;height:auto;padding:16px 18px;border-right:0;border-bottom:1px solid var(--line);gap:12px}.sidebar nav{display:flex;overflow-x:auto;gap:3px}.sidebar nav a{white-space:nowrap;padding:7px 10px}.sidebar nav a span,.side-title,.side-bottom{display:none}.main{padding:0 18px 35px}.hero{padding:25px 0 20px;grid-template-columns:1fr}.hero-orbit{display:none}.stats{grid-template-columns:repeat(2,1fr)}.section-head{display:block}.grid3,.roadmap{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,1fr)}.flow-detail{grid-template-columns:1fr}.topbar{flex-wrap:wrap}.glossary{grid-template-columns:1fr}.mass-controls{grid-template-columns:repeat(4,1fr)}.mass-controls label{font-size:11px}.mass-controls input{font-size:14px}.panel{padding:18px}.paper h1{font-size:32px}.equation{font-size:18px}.paper .abstract{padding:18px}.chart text{font-size:12px}}
+@media(max-width:390px){.main{padding-inline:12px}.flow{grid-template-columns:repeat(2,1fr)}.flow button:nth-child(3):after{content:'→'}.flow button:nth-child(even):after{content:none}.form-grid{grid-template-columns:1fr}.shape-row{grid-template-columns:70px 1fr}.shape-row code{grid-column:1/-1}.topbar{font-size:11px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:24px}h1{font-size:30px}.equation .number{float:none;display:block}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.term-tip{max-width:min(330px,calc(100vw - 16px))}
+@media print{body{background:white;font-size:11pt}.layout{display:block}.sidebar,.topbar,.print-hide,.term-tip,.control-row,.file-input{display:none!important}.main{max-width:none!important;padding:0}.hero{padding:10px 0}.paper h1{font-size:27pt}.section{break-before:auto;border-top:1px solid #bbb}.panel,.stat{box-shadow:none}.term{border:0}.equation{background:#f4f4f4}.table-wrap{overflow:visible}table{font-size:9pt}tr,.equation,figure{break-inside:avoid}a{color:inherit}.abstract{background:#f4f4f4!important}.paper .article-body p{font-size:10pt;line-height:1.65}.chart{min-height:0}.glossary{grid-template-columns:repeat(2,1fr)}.mass-controls{display:none}}
+
+</style></head>
+<body><a class="skip" href="#main">Lewati navigasi</a><div class="layout">
+<aside class="sidebar"><a class="brand" href="dashboard.html"><span class="brandmark" aria-hidden="true"></span>PhyGrainNet</a><div><div class="eyebrow">Research workspace</div><p class="small muted">Dari foto tanah ke kurva ukuran butiran.</p></div><div><div class="side-title">JELAJAHI PROYEK</div><nav aria-label="Bagian dashboard"><a class="active" href="#overview"><span>01</span>Ringkasan</a><a href="#pipeline"><span>02</span>Alur input → output</a><a href="#dataset"><span>03</span>Dataset & skala</a><a href="#architecture"><span>04</span>Arsitektur</a><a href="#lab"><span>05</span>Laboratorium kurva</a><a href="#compute"><span>06</span>Kaggle & komputasi</a><a href="#experiments"><span>07</span>Target & eksperimen</a><a href="#evidence"><span>08</span>Hasil & bukti</a><a href="#glossary"><span>09</span>Kamus istilah</a></nav></div><a class="action" href="paper.html">Baca paper proyek ↗</a><div class="side-bottom">Eksperimen dari random init<br><strong>24 sampel · 11 diameter</strong><br>Snapshot <span data-snapshot-date></span><br>HTML / CSS / JavaScript · offline</div></aside>
+<main class="main" id="main"><header class="topbar"><span>PROYEK / SOIL PHOTOGRANULOMETRY</span><div class="actions"><span class="badge">Dokumentasi interaktif</span><a href="paper.html">Paper ↗</a><button type="button" data-print>Cetak</button></div></header>
+<section id="overview" class="hero"><div><div class="eyebrow">Understand the science</div><h1>Melihat tanah.<br>Memahami butirannya.</h1><p class="lead">PhyGrainNet mempelajari hubungan antara foto permukaan tanah dan <span data-term="GSD">distribusi ukuran butiran</span>. Ikuti perjalanan satu sampel, lihat bentuk jaringan, lalu uji sendiri cara terbentuknya kurva prediksi.</p><div class="control-row"><a class="action primary" href="#pipeline">Jelajahi alur data ↓</a><a class="action" href="paper.html">Metode & persamaan ↗</a></div></div><div class="hero-orbit"><div><strong>11</strong><small>titik diameter<br>0,002—200 mm</small></div></div></section>
+<div class="notice"><strong>Status yang dapat dibuktikan.</strong> <span id="status-note">Pengembangan perangkat dan riset memiliki status terpisah.</span> Kurva demo, target, serta simulasi waktu diberi label; semuanya dapat digunakan untuk belajar sebelum eksperimen nyata tersedia.</div>
+<div class="stats"><article class="stat"><span class="stat-label">Pengembangan rilis lokal</span><strong id="software-progress">—</strong><div class="progress"><span id="software-bar"></span></div><small>Kode + portal + perangkat evaluasi</small></article><article class="stat"><span class="stat-label">Kemajuan riset keseluruhan</span><strong id="research-progress">—</strong><div class="progress"><span id="research-bar"></span></div><small>Gate Kaggle dan bukti ilmiah</small></article><article class="stat"><span class="stat-label">Sampel tanah latih</span><strong>24 <small>tanah</small></strong><small>127 foto ≠ 127 label independen</small></article><article class="stat"><span class="stat-label">Parameter PhyGrainNet-MV</span><strong id="parameter-count">—</strong><small>Bobot dipelajari dari random init</small></article></div>
+<div class="grid3"><article><h3>Tujuan</h3><p class="small muted">Mengestimasi persentase massa lolos saringan dari 2–5 foto satu tanah. Membantu skrining awal dan riset photogranulometry.</p></article><article><h3>Hipotesis</h3><p class="small muted">Skala fisik konsisten, tekstur, dan banyak pandangan dapat memperbaiki generalisasi ke lokasi serta kamera baru.</p></article><article><h3>Target yang bisa diperiksa</h3><p class="small muted">Kurva valid 100%, lebih baik dari baseline pada <span data-term="grouped CV">grouped CV</span>, serta inferensi ulang identik dari checkpoint tersimpan.</p></article></div>
+
+<section class="section" id="pipeline"><div class="section-head"><div><div class="eyebrow">01 / Data journey</div><h2>Satu tanah, banyak foto, satu kurva.</h2><p>Pilih tahap untuk melihat masukan, keluaran, dan alasan transformasinya. Foto satu sampel selalu berada dalam kelompok yang sama.</p></div><span class="badge demo">Diagram dari implementasi</span></div>
+<div class="flow" id="flow-steps"><button type="button" data-step="0" aria-pressed="true"><span class="step-num">01 / INPUT</span><strong>Foto + metadata</strong><small>RGB · ID · PPM · label</small></button><button type="button" data-step="1" aria-pressed="false"><span class="step-num">02 / PREPROCESS</span><strong>Kalibrasi fisik</strong><small>Border · 10 px/mm · warna</small></button><button type="button" data-step="2" aria-pressed="false"><span class="step-num">03 / SAMPLING</span><strong>Tile dua skala</strong><small>25,6 & 102,4 mm</small></button><button type="button" data-step="3" aria-pressed="false"><span class="step-num">04 / ENCODER</span><strong>Belajar tekstur</strong><small>RGB + Sobel + Laplacian</small></button><button type="button" data-step="4" aria-pressed="false"><span class="step-num">05 / AGGREGATE</span><strong>Satukan pandangan</strong><small>Mean · std · attention</small></button><button type="button" data-step="5" aria-pressed="false"><span class="step-num">06 / OUTPUT</span><strong>Kurva GSD</strong><small>11 titik · CSV tervalidasi</small></button></div>
+<div class="panel" id="flow-detail" aria-live="polite"></div><div class="grid2" style="margin-top:20px"><article class="panel"><h3>Dua jalur prediksi</h3><p class="small"><strong>A-track:</strong> <span data-term="granulometry">granulometry</span>, <span data-term="Fourier">Fourier</span>, gradien, <span data-term="LBP">LBP</span> dan warna → <span data-term="CLR">CLR</span> → ridge / PLS / kNN.</p><p class="small"><strong>C-track:</strong> tile → GrainEncoder → pooling → head terkendala → CDF. Baseline dan jaringan saling dibandingkan sebelum <span data-term="ensemble">ensemble</span>.</p></article><article class="panel"><h3>Training ≠ inference</h3><p class="small"><strong>Training:</strong> foto latih + label laboratorium → sampling acak, augmentasi, loss, gradien → bobot model.</p><p class="small"><strong>Inference:</strong> foto sampel baru + PPM + bobot → grid tile semua foto, TTA → kurva. Label uji tidak tersedia dan tidak dibutuhkan.</p><p class="small muted">CSV akhir: sample_id + 11 persentase; 200 mm = tepat 100.</p></article></div></section>
+
+<section class="section" id="dataset"><div class="section-head"><div><div class="eyebrow">02 / Small data, real constraints</div><h2>Dataset & arti skala fisik.</h2><p>Jumlah dan metadata kompetisi berasal dari audit terdokumentasi 4 Oktober 2026 di repositori; harus dikonfirmasi kembali oleh audit runtime Kaggle. <a href="https://www.kaggle.com/competitions/soil-grain-size-from-photos">Sumber kompetisi ↗</a></p></div></div>
+<div class="grid2"><article class="panel"><h3>Unit data yang benar</h3><div class="table-wrap"><table><thead><tr><th>Bagian</th><th>Tanah</th><th>Foto</th><th>Kamera</th></tr></thead><tbody><tr><td>Train</td><td>24</td><td>127</td><td>Motorola / Samsung</td></tr><tr><td>Test</td><td>10</td><td>35</td><td>iPhone 14 / 16</td></tr><tr><td>ETS opsional</td><td>321</td><td>12.714</td><td>Bench 45 MP, domain lain</td></tr></tbody></table></div><p class="caption">ETS adalah kandidat pretraining; belum diunduh atau dilatih di sesi ini. Jumlahnya didukung <a href="https://arxiv.org/abs/2506.17469">paper dataset</a>.</p><p class="small">13 kelompok lokasi adalah <strong>heuristik ID</strong> dengan gap angka ≤10, bukan metadata lokasi resmi. Batas ini diuji sensitivitasnya. <span data-term="domain shift">Domain shift</span> kamera dan lokasi merupakan risiko utama.</p></article><article class="panel"><h3>Coba konversi piksel → milimeter</h3><label for="camera">Kamera<select id="camera"><option value="11.492">Motorola Edge · 11,492 px/mm</option><option value="12.465">Edge 60 Fusion · 12,465 px/mm</option><option value="26.330">Samsung A52 · 26,330 px/mm</option><option value="13.942">iPhone 14 · 13,942 px/mm</option><option value="19.525">iPhone 16 · 19,525 px/mm</option></select></label><label for="grain-mm">Diameter ilustrasi: <output id="grain-mm-value">2 mm</output><input type="range" id="grain-mm" min="0.1" max="10" step="0.1" value="2"></label><svg id="scale-chart" class="chart" viewBox="0 0 600 210" role="img" aria-label="Diagram diameter dalam piksel sebelum dan sesudah kalibrasi"></svg><div class="result-line" id="scale-result" aria-live="polite"></div><p class="caption">Pada 10 px/mm, 0,002 mm = 0,02 piksel: lempung tidak terlihat sebagai butiran terpisah. Model hanya belajar petunjuk tidak langsung; foto permukaan juga berbeda dari distribusi massa 3D.</p></article></div>
+<details><summary>File dan schema yang harus tersedia di Kaggle</summary><pre><code>/kaggle/input/soil-grain-size-from-photos/
+├─ Training_labels_updated.csv  # sample_id + 11 titik label
+├─ ppm_updated.csv              # phone, camera, width, height, ppm
+├─ sample_submission.csv        # urutan 10 ID uji
+├─ Training-All_Photos_updated/Training-All_Photos_updated/
+└─ Test_All_Photos/Test_All_Photos/</code></pre><p class="small">Parser menormalisasi umlaut dan tanda baca agar ID foto cocok dengan ID submission. Audit memeriksa label finite, batas, monotonicity, PPM, ukuran foto, serta duplikat byte lintas split. Near-duplicate visual masih memerlukan review.</p></details>
+<div class="table-wrap panel" style="margin-top:20px"><table><caption>11 titik dukungan; F(d) = persentase massa yang lolos diameter d</caption><thead><tr><th>Diameter mm</th><th>0,002</th><th>0,0063</th><th>0,02</th><th>0,063</th><th>0,2</th><th>0,63</th><th>2</th><th>6,3</th><th>20</th><th>63</th><th>200</th></tr></thead><tbody><tr><td>Kelompok</td><td colspan="3">Halus</td><td colspan="3">Batas lanau / pasir</td><td colspan="4">Pasir / kerikil</td><td>100%</td></tr></tbody></table></div></section>
+
+<section class="section" id="architecture"><div class="section-head"><div><div class="eyebrow">03 / Model anatomy</div><h2>Arsitektur yang mengikuti sifat tanah.</h2><p>Berbagi encoder antar skala menghemat parameter. Agregasi attention berjalan linear terhadap jumlah tile; arsitektur ini tidak menggunakan Transformer.</p></div><a href="paper.html#method" class="action">Persamaan metode ↗</a></div><div class="grid2"><article class="panel"><h3>Perjalanan bentuk tensor</h3><div class="shape-track" id="shape-track"></div><p class="caption">B = batch, T = tile per sampel, S = skala. Ukuran diambil dari konfigurasi Kaggle aktif, bukan konfigurasi default B=8.</p></article><article class="panel"><h3>Di dalam GrainBlock</h3><div class="equation">x → [DW 3×3 ∥ DW 3×3 dilasi 2]<br>→ 1×1 mix → GN → GELU → gate<br>→ x + transformasi(x)</div><p class="small"><span data-term="depthwise">Depthwise</span> mencari pola lokal per kanal; <span data-term="dilated">dilasi</span> memberi konteks. <span data-term="GroupNorm">GroupNorm</span> menjaga normalisasi pada batch kecil. Gate kanal memilih fitur yang berguna.</p><p class="small">Stem: 5×5 stride 2. Tahap kanal: 32 → 48 → 96 → 160 → 224; blok: 1 / 2 / 2 / 3 / 2. Pooling spasial mean ∥ std menghasilkan 448 fitur per skala.</p><p class="small">Dua skala → 896 → embedding tile 256 → mean ∥ std ∥ <span data-term="attention pooling">attention</span> (768) → MLP 256 → 11 logit.</p></article></div><div class="grid3" style="margin-top:20px"><article><h3>Skala fisik</h3><p class="small muted">Foto distandardisasi ke 10 px/mm. Bidang 25,6 mm memakai 256 piksel; bidang 102,4 mm memakai 1.024 piksel lalu dikecilkan ke 256.</p></article><article><h3>Tekstur & pandangan</h3><p class="small muted">RGB + <span data-term="Sobel">Sobel</span> + <span data-term="Laplacian">Laplacian</span> → lima kanal. Semua tile sampel dipool sebelum kurva diprediksi; sampling lebih banyak tidak menambah label independen.</p></article><article><h3>Head terkendala</h3><p class="small muted">11 <span data-term="logit">logit</span> → softmax massa positif → cumsum. Invariant fisik valid sejak desain. Postprocess memastikan batas dan endpoint CSV tepat 100.</p></article></div></section>
+
+<section class="section" id="lab"><div class="section-head"><div><div class="eyebrow">04 / Interactive laboratory</div><h2>Ubah logit. Lihat kurva terbentuk.</h2><p>Softmax membagikan 100% massa ke 11 interval. Edit skor mentah dan bandingkan terhadap kurva referensi ilustratif; grafik, komposisi tanah, dan EMD akan berubah.</p></div><span class="badge demo">Simulasi · bukan hasil model</span></div><div class="panel"><div class="control-row"><label for="soil-preset">Contoh kurva<select id="soil-preset"><option value="balanced">Campuran seimbang</option><option value="fine">Tanah halus</option><option value="gravel">Tanah berkerikil</option></select></label><button id="reset-curve" type="button">Reset logit</button><button id="download-demo" type="button">Unduh kurva demo CSV</button></div><div class="mass-controls" id="mass-controls"></div><div class="grid2"><div><svg class="chart" id="cdf-chart" role="img" aria-label="CDF referensi dan prediksi ilustratif pada diameter berskala logaritmik"></svg><div class="legend"><span>Referensi ilustratif</span><span>Prediksi dari logit</span></div></div><div><svg class="chart" id="emd-chart" role="img" aria-label="Kontribusi EMD tiap interval logaritmik"></svg><p class="caption">Nilai 200 mm tidak menyumbang EMD; bobot sepuluh interval berjumlah 5. Kesalahan menggunakan 0–1 alih-alih 0–100 akan mengecilkan skor 100 kali.</p></div></div><div class="result-line" id="curve-result" aria-live="polite"></div><div class="fraction-bar" id="fraction-bar" aria-label="Proporsi lempung, lanau, pasir dan kerikil"></div><p class="caption" id="fraction-label"></p><div class="equation">mᵢ = 100 exp(zᵢ) / Σⱼ exp(zⱼ) &nbsp; ; &nbsp; F̂ₖ = Σᵢ₌₁ᵏ mᵢ</div><p class="small muted">Massa pertama adalah ≤0,002 mm; massa kedua hingga kesebelas berada di interval antar diameter. Ini representasi massa fraksi, bukan jumlah butiran dalam foto.</p></div></section>
+
+<section class="section" id="compute"><div class="section-head"><div><div class="eyebrow">05 / Compute budget</div><h2>Kaggle, GPU, dan perkiraan waktu.</h2><p>Target awal: satu NVIDIA T4 dengan mixed precision jika tersedia. Pilihan accelerator dan kuota aktual mengikuti akun serta runtime; deteksi perangkat dulu sebelum memperkirakan durasi.</p></div><span class="badge pending">Waktu GPU belum diukur</span></div><div class="grid2"><article class="panel"><h3>Lingkungan yang kita gunakan</h3><div class="table-wrap"><table><tbody><tr><td>Platform</td><td>Kaggle Notebook / IDE, Python ≥3.10, PyTorch ≥2.2</td></tr><tr><td>Accelerator rencana</td><td>T4 ×2 jika ditawarkan; kode memakai <strong>cuda:0 saja</strong></td></tr><tr><td>Memori GPU</td><td>Per perangkat, tidak otomatis digabung; deteksi VRAM saat runtime</td></tr><tr><td>CPU lokal sekarang</td><td id="local-hardware">Membaca snapshot…</td></tr><tr><td>Input / output</td><td><code>/kaggle/input/</code> / <code>/kaggle/working/</code></td></tr><tr><td>AMP / EMA</td><td>FP16 CUDA / 0,995</td></tr><tr><td>Budget awal</td><td>≤12 jam elapsed sebagai rencana per sesi; periksa limit aktual akun</td></tr></tbody></table></div><p class="caption">Dokumentasi <a href="https://github.com/Kaggle/kaggle-cli/blob/main/docs/kernels.md">Kaggle CLI (Sep 2026)</a> mencantumkan T4 dan accelerator lain dengan batas akses. <a href="https://www.kaggle.com/docs/efficient-gpu-usage">Panduan kuota</a> menyebut sekitar 30 jam/minggu atau lebih; kuota akun aktual tetap harus dicek. P100 hanya jika tersedia dan cocok dengan build PyTorch.</p><pre><code>python scripts/profile_model.py \
+  --config configs/phygrainnet/kaggle_scratch.yaml \
+  --benchmark --device cuda \
+  --out /kaggle/working/outputs/profile.json</code></pre></article><article class="panel"><h3>Kalkulator durasi yang transparan</h3><p class="small muted">Nilai awal 0,5 detik/step adalah asumsi simulasi. Impor profile.json Kaggle untuk menggantinya dengan median benchmark; biaya data loading dan evaluasi diestimasi terpisah.</p><div class="form-grid"><label>Epoch<input id="cost-epochs" type="number" min="1" max="1000" value="40"></label><label>Step / epoch<input id="cost-steps" type="number" min="1" max="10000" value="50"></label><label>Fold<input id="cost-folds" type="number" min="1" max="30" value="5"></label><label>Seed<input id="cost-seeds" type="number" min="1" max="20" value="1"></label><label>Detik / step<input id="cost-seconds" type="number" min="0.001" max="600" step="0.01" value="0.5"></label><label>Tambahan waktu %<input id="cost-overhead" type="number" min="0" max="1000" value="30"></label><label>Harga per GPU-jam (USD)<input id="cost-rate" type="number" min="0" max="100" step="0.01" value="0"></label><label><input id="cost-full" type="checkbox"> Tambah full fit</label></div><div class="result-line" id="cost-result" aria-live="polite"></div><p id="cost-detail" class="small muted"></p><label for="profile-file">Impor benchmark profile.json<input class="file-input" id="profile-file" type="file" accept=".json,application/json"></label><p class="caption" id="profile-message" aria-live="polite">Tidak ada benchmark yang diimpor.</p><p class="caption">Harga $0 menggambarkan penggunaan kuota gratis yang tersedia. Tidak menjamin ketersediaan GPU. Jam kalender belum termasuk antrean atau setup; kalkulator memakai satu GPU.</p></article></div><div class="grid3" style="margin-top:20px"><article class="stat"><span class="stat-label">Forward Conv + Linear / batch</span><strong id="gmacs">—</strong><small>GMAC; perkiraan FLOP ≈ 2×MAC</small></article><article class="stat"><span class="stat-label">Bobot FP32</span><strong id="weights-memory">—</strong><small>Hanya parameter</small></article><article class="stat"><span class="stat-label">AdamW + grad + EMA</span><strong id="state-memory">—</strong><small>Belum termasuk aktivasi / buffer</small></article></div><div class="equation">C<sub>batch</sub> = O(BTS · C<sub>encoder</sub> + BTSD<sub>enc</sub>D + BTDh + BD² + BDK)<br>C<sub>train</sub> = O(R G E Q · C<sub>batch</sub>)</div><p class="small muted">R=seed, G=fold, E=epoch, Q=step/epoch, K=11, D=embedding, h=hidden attention. Encoder didominasi konvolusi H×W×k²×C<sub>in</sub>×C<sub>out</sub> dan depthwise H×W×k²×C. Detail memori, inference, classical track, dan asumsi backward tersedia di paper.</p>
+<details><summary>Urutan eksekusi yang disarankan di Kaggle</summary><ol class="plain-list"><li>Attach dataset kompetisi; pilih accelerator dan periksa Python, Torch, CUDA serta semua perangkat.</li><li>Jalankan audit + baseline mean/median sebelum training serius.</li><li>Jalankan profiler dan smoke 1 epoch / 2 step / 1 fold. Pastikan loss finite, VRAM, waktu, checkpoint.</li><li>Jalankan C100 full CV dan B000 pembanding. Bila OOM kurangi batch, tile, atau chunk secara terdokumentasi.</li><li>Jalankan ablation satu per satu; lalu tiga seed untuk kandidat terpilih.</li><li>Ekspor research_report.json, validasi submission, arsipkan, dan restore inference dalam sesi bersih.</li></ol><pre><code>python scripts/train.py --config configs/phygrainnet/kaggle_scratch.yaml
+python scripts/train.py --config configs/ablations/no_texture.yaml
+python scripts/research_report.py --runs /kaggle/working/outputs/C100 --out /kaggle/working/outputs/research_report.json
+python scripts/export_results.py</code></pre></details></section>
+
+<section class="section" id="experiments"><div class="section-head"><div><div class="eyebrow">06 / Evidence before claims</div><h2>Target & roadmap menuju riset lengkap.</h2><p>100% pengembangan rilis lokal berarti checklist perangkat selesai. 100% riset membutuhkan gate data nyata, evaluasi, ablation, submission, dan reproduksi hasil.</p></div></div><div class="roadmap"><article><span class="badge">Fondasi perangkat</span><h3>Pipeline, model & dokumentasi</h3><p class="small muted">Konfigurasi, tests sintetis, audit, constrained head, pelatihan, inferensi, dashboard, paper metode, profiler, laporan.</p></article><article class="pending"><span class="badge pending">Menunggu data nyata</span><h3>Audit + baseline + C100</h3><p class="small muted">G1/G2: audit dataset Kaggle dan CV penuh. Catat baseline A000/A001/B000, waktu GPU, serta perbedaan kamera.</p></article><article class="pending"><span class="badge pending">Menunggu eksperimen</span><h3>Ablation + final + paper hasil</h3><p class="small muted">G3–G5: uji komponen dan seed, CI95, restore inference, submission, hasil dan batas penelitian.</p></article></div><div class="grid2"><article class="panel"><h3>Kriteria penerimaan</h3><ul class="plain-list"><li>0 kurva invalid, 0 ID salah, 0 overlap kelompok di fold.</li><li>CV EMD lebih rendah dari baseline statistik dan pembanding neural pada fold identik.</li><li>Target riset usulan: ≥10% perbaikan relatif dari baseline terbaik; bukan jaminan skor.</li><li>Perbaikan pada mayoritas kelompok, evaluasi tiga seed (42 / 123 / 2026), uncertainty dan error kasus terburuk.</li><li>Final inference dapat diulang dari checkpoint tanpa training.</li></ul></article><article class="panel"><h3>Matriks ablation siap dijalankan</h3><div class="table-wrap"><table><thead><tr><th>ID</th><th>Pertanyaan</th></tr></thead><tbody id="ablation-rows"></tbody></table></div><p class="caption">Head terkendala diuji sebagai invariant. B000 tetap GrainBlock tanpa texture/satu skala; belum merupakan vanilla CNN yang cocok untuk klaim superiority universal.</p></article></div><div id="gate-grid" class="grid3" style="margin-top:20px"></div></section>
+
+<section class="section" id="evidence"><div class="section-head"><div><div class="eyebrow">07 / Results explorer</div><h2>Baca hasil asli setelah training.</h2><p>Laporan dibuat oleh scripts/research_report.py setelah memverifikasi CV lengkap, ID, label, kelompok dan provenance fold. Impor hanya dibaca di browser ini; file tidak diunggah.</p></div><span class="badge pending" id="evidence-badge">Belum ada OOF nyata</span></div><div class="panel"><label for="report-file">Pilih research_report.json<input class="file-input" id="report-file" type="file" accept=".json,application/json"></label><p id="report-message" class="caption" aria-live="polite">Belum ada klaim performa PhyGrainNet pada data kompetisi. Skor historis di docs/DATASET.md adalah referensi terdokumentasi, bukan hasil run ini.</p><div id="report-content" hidden></div></div></section>
+
+<section class="section" id="glossary"><div class="section-head"><div><div class="eyebrow">08 / Learn the language</div><h2>Kamus istilah.</h2><p>Istilah bergaris titik bisa diarahkan kursor, difokuskan, atau diketuk untuk menampilkan komentar penjelas. Penjelasan juga tersedia lengkap di sini.</p></div></div><label for="glossary-search">Cari istilah atau arti<input class="search" id="glossary-search" type="search" placeholder="Contoh: EMD, batch, VRAM…"></label><div id="glossary-list" class="glossary"></div></section>
+<footer class="footer">PhyGrainNet · Riset dari random initialization · <a href="paper.html">Paper metode</a> · <a href="../README.md">README</a><br>Halaman offline; tidak melakukan training di browser. Sumber fakta, konfigurasi, status dan batas klaim dijelaskan dalam paper.</footer></main></div><div id="term-tip" class="term-tip" role="tooltip" hidden></div><script>
+/* Generated by scripts/build_portal.py. Do not edit by hand. */
+window.PROJECT = {
+  "snapshot_date": "2026-10-10",
+  "status": {
+    "project": "PhyGrainNet",
+    "overall_progress_percent": 10,
+    "competition_readiness_percent": 10,
+    "current_phase": "P2",
+    "current_phase_name": "Dataset Audit (code ready, Kaggle run pending)",
+    "next_phase": "P5",
+    "next_phase_name": "Baselines + first submission",
+    "default_seed": 42,
+    "primary_environment": "Kaggle Notebook / Kaggle IDE",
+    "best_local_cv_emd": null,
+    "best_public_score": null,
+    "gates": {
+      "G0": {
+        "name": "Research Specification",
+        "status": "passed",
+        "completion": 1.0
+      },
+      "G1": {
+        "name": "Data Integrity",
+        "status": "blocked",
+        "completion": 0
+      },
+      "G2": {
+        "name": "Experimental Validity",
+        "status": "in_progress",
+        "completion": 0.5
+      },
+      "G3": {
+        "name": "Architecture Validation",
+        "status": "blocked",
+        "completion": 0
+      },
+      "G4": {
+        "name": "Competition Ready",
+        "status": "blocked",
+        "completion": 0
+      },
+      "G5": {
+        "name": "Research Ready",
+        "status": "blocked",
+        "completion": 0
+      }
+    },
+    "phases": [
+      {
+        "id": "P0",
+        "name": "Research specification",
+        "cumulative_progress": 4,
+        "status": "complete"
+      },
+      {
+        "id": "P1",
+        "name": "Repository foundation",
+        "cumulative_progress": 8,
+        "status": "complete"
+      },
+      {
+        "id": "P2",
+        "name": "Dataset audit",
+        "cumulative_progress": 14,
+        "status": "in_progress"
+      },
+      {
+        "id": "P3",
+        "name": "EDA",
+        "cumulative_progress": 20,
+        "status": "code_ready"
+      },
+      {
+        "id": "P4",
+        "name": "Exact metric + leakage-safe CV",
+        "cumulative_progress": 28,
+        "status": "code_ready"
+      },
+      {
+        "id": "P5",
+        "name": "Baselines",
+        "cumulative_progress": 38,
+        "status": "code_ready"
+      },
+      {
+        "id": "P6",
+        "name": "PhyGrainNet v0",
+        "cumulative_progress": 50,
+        "status": "pending"
+      },
+      {
+        "id": "P7",
+        "name": "Physical multi-scale modelling",
+        "cumulative_progress": 60,
+        "status": "pending"
+      },
+      {
+        "id": "P8",
+        "name": "Texture + multi-view modelling",
+        "cumulative_progress": 70,
+        "status": "pending"
+      },
+      {
+        "id": "P9",
+        "name": "Ablation study",
+        "cumulative_progress": 80,
+        "status": "pending"
+      },
+      {
+        "id": "P10",
+        "name": "Robust evaluation",
+        "cumulative_progress": 87,
+        "status": "pending"
+      },
+      {
+        "id": "P11",
+        "name": "Ensemble + Kaggle submission",
+        "cumulative_progress": 92,
+        "status": "pending"
+      },
+      {
+        "id": "P12",
+        "name": "Error analysis",
+        "cumulative_progress": 96,
+        "status": "pending"
+      },
+      {
+        "id": "P13",
+        "name": "Reproducibility packaging",
+        "cumulative_progress": 98,
+        "status": "pending"
+      },
+      {
+        "id": "P14",
+        "name": "Paper-ready evidence",
+        "cumulative_progress": 100,
+        "status": "pending"
+      }
+    ],
+    "deadline": "2026-11-30 18:00 WIB",
+    "goal": "private leaderboard with models trained from random init; public soil data allowed for pretraining",
+    "software_release": {
+      "version": "0.3.0",
+      "completion_percent": 100,
+      "scope": "Local development release: pipeline tools, interactive dashboard and methods paper. This is separate from scientific/competition completion.",
+      "checklist": [
+        {
+          "id": "core_pipeline",
+          "complete": true
+        },
+        {
+          "id": "model_invariants",
+          "complete": true
+        },
+        {
+          "id": "compute_profiler",
+          "complete": true
+        },
+        {
+          "id": "geotechnical_report",
+          "complete": true
+        },
+        {
+          "id": "ablation_configs",
+          "complete": true
+        },
+        {
+          "id": "dashboard",
+          "complete": true
+        },
+        {
+          "id": "methods_paper",
+          "complete": true
+        },
+        {
+          "id": "kaggle_runner",
+          "complete": true
+        },
+        {
+          "id": "offline_snapshot",
+          "complete": true
+        },
+        {
+          "id": "verification",
+          "complete": true
+        }
+      ],
+      "verification": "docs/LOCAL_VERIFICATION.md",
+      "research_limit": "No real Kaggle dataset/CUDA run, complete competition OOF, ablation evidence or leaderboard result in this workspace."
+    },
+    "updated_at": "2026-10-10"
+  },
+  "config": {
+    "project": "PhyGrainNet",
+    "seed": 42,
+    "pipeline": "cnn",
+    "data": {
+      "root": "/kaggle/input/soil-grain-size-from-photos",
+      "cache_dir": "/kaggle/working/cache",
+      "scale_mode": "resize",
+      "target_ppm": 10.0,
+      "border_frac": 0.06,
+      "color_mode": "grayworld",
+      "fields_mm": [
+        25.6,
+        102.4
+      ],
+      "tile_px": 256,
+      "num_workers": 2,
+      "n_jobs": 2,
+      "strict_catalog": true
+    },
+    "cv": {
+      "strategy": "group_kfold",
+      "n_folds": 5,
+      "max_gap": 10
+    },
+    "model": {
+      "name": "phygrainnet_mv",
+      "pretrained": false,
+      "channels": [
+        32,
+        48,
+        96,
+        160,
+        224
+      ],
+      "blocks": [
+        1,
+        2,
+        2,
+        3,
+        2
+      ],
+      "texture_stream": true,
+      "share_scales": true,
+      "embed_dim": 256,
+      "dropout": 0.2
+    },
+    "training": {
+      "epochs": 40,
+      "steps_per_epoch": 50,
+      "batch_size": 2,
+      "tiles_per_sample": 6,
+      "learning_rate": 0.001,
+      "weight_decay": 0.05,
+      "warmup_steps": 200,
+      "gradient_clip_norm": 1.0,
+      "ema_decay": 0.995,
+      "mix_prob": 0.3,
+      "scale_jitter": 0.08,
+      "photometric": 1.0,
+      "bound_weight": 1.0,
+      "eval_every": 10,
+      "amp": true,
+      "full_fit": false,
+      "init_checkpoint": null,
+      "init_encoder_only": false
+    },
+    "inference": {
+      "tta": 4,
+      "max_tiles_per_image": 48,
+      "chunk": 16
+    },
+    "output": {
+      "dir": "/kaggle/working/outputs",
+      "registry": "/kaggle/working/registry.csv",
+      "save_checkpoints": true
+    },
+    "experiment_id": "C100",
+    "notes_short": "multi-scale 25.6+102.4mm, texture stream, attention view pooling, random init"
+  },
+  "profile": {
+    "config": {
+      "project": "PhyGrainNet",
+      "seed": 42,
+      "pipeline": "cnn",
+      "data": {
+        "root": "/kaggle/input/soil-grain-size-from-photos",
+        "cache_dir": "/kaggle/working/cache",
+        "scale_mode": "resize",
+        "target_ppm": 10.0,
+        "border_frac": 0.06,
+        "color_mode": "grayworld",
+        "fields_mm": [
+          25.6,
+          102.4
+        ],
+        "tile_px": 256,
+        "num_workers": 2,
+        "n_jobs": 2,
+        "strict_catalog": true
+      },
+      "cv": {
+        "strategy": "group_kfold",
+        "n_folds": 5,
+        "max_gap": 10
+      },
+      "model": {
+        "name": "phygrainnet_mv",
+        "pretrained": false,
+        "channels": [
+          32,
+          48,
+          96,
+          160,
+          224
+        ],
+        "blocks": [
+          1,
+          2,
+          2,
+          3,
+          2
+        ],
+        "texture_stream": true,
+        "share_scales": true,
+        "embed_dim": 256,
+        "dropout": 0.2
+      },
+      "training": {
+        "epochs": 40,
+        "steps_per_epoch": 50,
+        "batch_size": 2,
+        "tiles_per_sample": 6,
+        "learning_rate": 0.001,
+        "weight_decay": 0.05,
+        "warmup_steps": 200,
+        "gradient_clip_norm": 1.0,
+        "ema_decay": 0.995,
+        "mix_prob": 0.3,
+        "scale_jitter": 0.08,
+        "photometric": 1.0,
+        "bound_weight": 1.0,
+        "eval_every": 10,
+        "amp": true,
+        "full_fit": false,
+        "init_checkpoint": null,
+        "init_encoder_only": false
+      },
+      "inference": {
+        "tta": 4,
+        "max_tiles_per_image": 48,
+        "chunk": 16
+      },
+      "output": {
+        "dir": "/kaggle/working/outputs",
+        "registry": "/kaggle/working/registry.csv",
+        "save_checkpoints": true
+      },
+      "experiment_id": "C100",
+      "notes_short": "multi-scale 25.6+102.4mm, texture stream, attention view pooling, random init"
+    },
+    "hardware": {
+      "python": "3.13.15",
+      "torch": "2.13.0+cpu",
+      "cuda_available": false,
+      "cuda_runtime": null,
+      "cudnn": null,
+      "cpu_threads": 2,
+      "gpus": [],
+      "execution": "single GPU (cuda:0) or CPU; no DDP; GPU memory is not pooled"
+    },
+    "model": {
+      "kind": "analytical counts observed on synthetic tensors",
+      "input_shape": [
+        2,
+        6,
+        2,
+        3,
+        256,
+        256
+      ],
+      "parameters": 1518836,
+      "trainable_parameters": 1518836,
+      "weight_mib_fp32": 5.7938995361328125,
+      "adamw_plus_ema_state_mib_fp32": 28.969497680664062,
+      "state_memory_note": "5 FP32 arrays: weights, gradients, Adam m/v, EMA; excludes activations, buffers, allocator, AMP temporaries",
+      "input_mib_fp32": 18.0,
+      "forward_macs_batch": 9717806080,
+      "forward_flops_approx_batch": 19435612160,
+      "forward_macs_sample": 4858903040,
+      "output_shape": [
+        2,
+        11
+      ],
+      "count_excludes": "functional texture filters, normalization, activations, pooling, backward, optimizer, IO"
+    }
+  },
+  "diameters": [
+    0.002,
+    0.0063,
+    0.02,
+    0.063,
+    0.2,
+    0.63,
+    2.0,
+    6.3,
+    20.0,
+    63.0,
+    200.0
+  ],
+  "weights": [
+    0.49831055378960043,
+    0.5016894462103996,
+    0.49831055378960043,
+    0.5016894462103996,
+    0.49831055378960043,
+    0.5016894462103995,
+    0.4983105537896005,
+    0.5016894462103996,
+    0.49831055378960043,
+    0.5016894462103996
+  ],
+  "ablations": [
+    {
+      "file": "configs/ablations/mean_pool.yaml",
+      "id": "F107",
+      "description": "replace attention statistic with mean; retain output dimension"
+    },
+    {
+      "file": "configs/ablations/no_color.yaml",
+      "id": "F105",
+      "description": "without gray-world white balance"
+    },
+    {
+      "file": "configs/ablations/no_mixing.yaml",
+      "id": "F104",
+      "description": "without virtual tile mixing"
+    },
+    {
+      "file": "configs/ablations/no_scale_calibration.yaml",
+      "id": "F106",
+      "description": "native pixels; fields not calibrated to mm"
+    },
+    {
+      "file": "configs/ablations/no_texture.yaml",
+      "id": "F101",
+      "description": "texture_stream=false; matched C100"
+    },
+    {
+      "file": "configs/ablations/single_scale.yaml",
+      "id": "F102",
+      "description": "one physical scale; report compute difference"
+    },
+    {
+      "file": "configs/ablations/single_tile.yaml",
+      "id": "F103",
+      "description": "one tile per sample; reduced evidence and compute"
+    }
+  ]
+};
+
+</script><script>
+/* Plain-language comments exposed as hover/focus/tap definitions. */
+window.GLOSSARY = {
+ 'GSD':'Grain Size Distribution: distribusi ukuran butiran tanah. Di sini berupa persentase massa kumulatif yang lolos pada 11 diameter saringan.',
+ 'PSD':'Particle Size Distribution: istilah lain untuk distribusi ukuran partikel; pada proyek ini digunakan setara dengan GSD.',
+ 'CDF':'Cumulative Distribution Function: fungsi kumulatif. F(d)=persentase massa butiran berdiameter ≤ d; selalu naik atau tetap.',
+ 'PPM':'Pixels per millimetre (px/mm), jumlah piksel yang mewakili satu milimeter fisik. Bukan parts per million dalam proyek ini.',
+ 'tile':'Potongan kecil dari foto. Beberapa tile dari beberapa foto tetap mewakili satu sampel tanah dan satu label.',
+ 'multi-view':'Menggabungkan bukti dari beberapa foto sampel yang sama. Foto-foto tersebut bukan sampel berlabel independen.',
+ 'multi-scale':'Melihat pusat tanah yang sama dengan dua luas bidang: 25,6 mm untuk tekstur detail dan 102,4 mm untuk konteks.',
+ 'domain shift':'Perubahan kondisi antara data latih dan data uji, misalnya kamera Motorola/Samsung menjadi iPhone dan lokasi tanah baru.',
+ 'gray-world':'White balance yang mengasumsikan rata-rata warna scene mendekati abu-abu. Bisa mengurangi bias kamera, tetapi manfaatnya harus diuji.',
+ 'Sobel':'Filter tetap untuk menghitung perubahan intensitas arah horizontal/vertikal. Magnitudonya menonjolkan batas dan tekstur butiran.',
+ 'Laplacian':'Filter turunan kedua intensitas. Menonjolkan perubahan lokal tajam; sensitif terhadap noise dan blur.',
+ 'CNN':'Convolutional Neural Network: jaringan yang mempelajari pola spasial melalui filter konvolusi pada gambar.',
+ 'depthwise':'Konvolusi terpisah per kanal. Biaya kira-kira H×W×k²×C, lebih murah daripada mencampur semua kanal dengan kernel yang sama.',
+ 'dilated':'Konvolusi dengan jarak antar titik kernel; melihat konteks lebih luas tanpa menambah ukuran kernel 3×3.',
+ 'GroupNorm':'Normalisasi fitur dalam kelompok kanal per contoh, sehingga tidak bergantung pada ukuran batch. Cocok untuk batch kecil.',
+ 'GELU':'Gaussian Error Linear Unit: fungsi aktivasi nonlinear yang mengatur lewatnya nilai fitur secara halus.',
+ 'attention pooling':'Memberi bobot terpelajar pada tile saat menggabungkannya. Di sini attention linear atas tile, bukan self-attention kuadratik seperti Transformer.',
+ 'embedding':'Vektor angka ringkas yang mewakili pola dari gambar atau sampel; tidak mempunyai satuan diameter langsung.',
+ 'softmax':'Mengubah logit menjadi proporsi positif dengan total satu. Setelah dikali 100, menghasilkan massa interval yang totalnya 100%.',
+ 'logit':'Skor mentah keluaran jaringan sebelum softmax. Logit boleh negatif; massa dan kurva hasilnya tetap nonnegatif.',
+ 'cumsum':'Cumulative sum: penjumlahan massa interval dari kecil ke besar untuk membentuk CDF yang monoton.',
+ 'EMD':'Earth Mover’s Distance versi kompetisi: jumlah selisih absolut CDF dalam poin persentase × lebar interval log10 diameter. Lebih rendah lebih baik; rentang teoritis 0–500.',
+ 'OOF':'Out-of-fold: prediksi sebuah sampel dibuat oleh model yang tidak dilatih pada sampel atau kelompoknya. Digunakan untuk evaluasi lokal.',
+ 'grouped CV':'Cross-validation dengan seluruh sampel dari kelompok lokasi yang sama disimpan dalam satu fold; mengurangi kebocoran data.',
+ 'fold':'Satu pembagian data latih/validasi. Lima fold menghasilkan lima model dan setiap sampel mendapat satu prediksi OOF.',
+ 'leakage':'Kebocoran informasi validasi ke pelatihan atau pemilihan model, sehingga skor lokal menjadi terlalu optimistis.',
+ 'ablation':'Eksperimen terkontrol yang menghilangkan satu komponen untuk menguji apakah komponen itu benar-benar membantu.',
+ 'AdamW':'Optimizer berbasis momentum dan adaptasi langkah dengan weight decay terpisah. Memperbarui bobot untuk menurunkan loss.',
+ 'epoch':'Satu periode pelatihan. Di proyek ini panjangnya ditentukan steps_per_epoch, bukan satu kali melewati semua foto.',
+ 'batch':'Sekelompok sampel tanah dalam satu pembaruan model. Profil Kaggle: B=2; masing-masing memiliki T=6 tile dan S=2 skala.',
+ 'learning rate':'Besar langkah pembaruan bobot optimizer. Nilai awal 0,001, lalu warm-up dan cosine decay.',
+ 'weight decay':'Regularisasi yang menekan besarnya bobot. AdamW menggunakan 0,05 dalam konfigurasi awal.',
+ 'EMA':'Exponential Moving Average: rata-rata bergerak bobot model (decay 0,995). Bobot EMA dipakai untuk prediksi akhir.',
+ 'AMP':'Automatic Mixed Precision: sebagian operasi memakai FP16 di CUDA untuk menghemat memori dan dapat mempercepat pelatihan. Loss tetap FP32.',
+ 'gradient clipping':'Membatasi norma gradien maksimum (1,0) untuk mengurangi lonjakan pembaruan yang tidak stabil.',
+ 'TTA':'Test-Time Augmentation: prediksi pada rotasi/flip gambar lalu dirata-ratakan. TTA=4 berarti empat rotasi.',
+ 'SSL':'Self-supervised learning: mempelajari representasi dari foto tanpa label laboratorium. Tidak menjadikan foto uji mempunyai label.',
+ 'SimCLR':'Metode SSL yang mendekatkan representasi dua augmentasi foto yang sama dan memisahkan foto berbeda melalui contrastive loss.',
+ 'transductive':'Protokol yang memanfaatkan foto tanpa label dari data validasi/uji saat pretraining. Harus dilaporkan terpisah dari evaluasi induktif.',
+ 'inductive':'Evaluasi di mana data validasi/uji, termasuk foto tanpa labelnya, tidak dipakai untuk pelatihan representasi.',
+ 'ETS':'École de technologie supérieure, Montréal. Dataset kandidat: 321 sampel, 12.714 foto; domain dan cakupan label berbeda dari kompetisi.',
+ 'masked loss':'Loss yang hanya menghitung titik diameter dengan label tersedia. Titik ETS <0,08 mm tidak dianggap mempunyai label.',
+ 'hinge':'Penalti max(0, prediksi−batas). Dipakai agar passing pada titik halus yang tanpa label tidak melebihi passing saringan 0,08 mm.',
+ 'D50':'Diameter saat CDF mencapai 50% massa. Interpolasi pada log10 diameter; tidak diekstrapolasi di bawah 0,002 mm.',
+ 'D10':'Diameter saat 10% massa telah lolos; bisa berada di bawah titik dukungan sehingga nilainya dilaporkan tidak terdefinisi.',
+ 'bootstrap':'Estimasi variasi statistik dengan mengambil ulang kelompok lokasi, dengan pengembalian. Interval ini tidak mencakup bias pemilihan model.',
+ 'Big O':'Notasi laju pertumbuhan biaya terhadap ukuran input. Tidak memberi waktu detik; konstanta, GPU, data loader, dan implementasi tetap menentukan.',
+ 'MAC':'Multiply–accumulate: satu perkalian dan penjumlahan. Profil hanya menghitung Conv2d dan Linear; kira-kira dua FLOP per MAC.',
+ 'FLOP':'Floating-point operation: satu operasi aritmetika. Angka estimasi ini bukan pengukuran throughput GPU atau semua operasi program.',
+ 'VRAM':'Memori pada GPU. Dua T4 tidak otomatis menjadi satu memori gabungan; kode sekarang memakai cuda:0.',
+ 'CUDA':'Platform komputasi NVIDIA yang memungkinkan PyTorch menjalankan operasi pada GPU yang kompatibel.',
+ 'DDP':'DistributedDataParallel: pelatihan multi-GPU yang harus diimplementasikan secara eksplisit. Belum digunakan di proyek ini.',
+ 'checkpoint':'Berkas bobot model beserta konfigurasi dan asal bobot. Saat ini untuk pemulihan inferensi; optimizer tidak disimpan untuk resume epoch.',
+ 'ridge':'Regresi linear dengan regularisasi L2; cocok sebagai pembanding pada sedikit sampel dan fitur fisik buatan.',
+ 'CLR':'Centered log-ratio: transformasi log massa interval relatif terhadap rata-rata geometrik, untuk regresi data komposisi.',
+ 'PLS':'Partial Least Squares: regresi melalui komponen laten yang menghubungkan fitur dan target.',
+ 'LBP':'Local Binary Pattern: ringkasan pola perbandingan intensitas tetangga piksel untuk tekstur.',
+ 'granulometry':'Pengukuran respons tekstur terhadap struktur morfologi berbagai ukuran; fitur ukuran dikalibrasi dalam mm.',
+ 'Fourier':'Transformasi gambar ke frekuensi spasial. Energi per panjang gelombang membantu merangkum ukuran pola tekstur.',
+ 'ensemble':'Menggabungkan beberapa model. Median per titik dihitung untuk mempertahankan kurva monoton; manfaatnya diuji lewat OOF.',
+ 'private leaderboard':'Peringkat pada bagian label uji tersembunyi. Target kompetisi; tidak dapat disimpulkan dari tes lokal atau tiga sampel public leaderboard.',
+ 'hyperparameter':'Pengaturan sebelum training, seperti learning rate, epoch, batch dan jumlah tile; berbeda dari bobot yang dipelajari model.'
+};
+Object.assign(window.GLOSSARY, {
+ 'encoder':'Bagian jaringan yang mengubah gambar menjadi vektor fitur; bobotnya dipelajari dari training, bukan aturan diameter langsung.',
+ 'inference':'Menjalankan model yang sudah dilatih pada foto baru untuk menghasilkan prediksi; tidak memperbarui bobot dan tidak memerlukan label.',
+ 'preprocessing':'Transformasi sebelum model: membaca foto, crop border, kalibrasi ukuran fisik, serta normalisasi warna.',
+ 'MLP':'Multilayer Perceptron: jaringan linear dan aktivasi berlapis yang memproses vektor fitur, bukan grid gambar.',
+ 'LayerNorm':'Normalisasi vektor fitur satu contoh pada dimensi embedding. Berbeda dari GroupNorm yang mengelompokkan kanal spasial.',
+ 'stride':'Jarak pergeseran kernel konvolusi. Stride 2 mengecilkan tinggi dan lebar fitur kira-kira separuh.',
+ 'gate':'Bobot 0–1 per kanal untuk mengatur pengaruh fitur. Dipelajari oleh jaringan kecil dari rata-rata spasial fitur.',
+ 'residual':'Koneksi yang menambahkan input ke hasil transformasinya. Membantu aliran gradien pada jaringan.',
+ 'FP16':'Floating point 16 bit. Mengurangi kebutuhan memori per angka dibanding FP32, tetapi memiliki rentang dan ketelitian lebih kecil.',
+ 'FP32':'Floating point 32 bit. Digunakan untuk bobot dan loss; satu angka memerlukan empat byte.',
+ 'random init':'Bobot awal diambil dari distribusi acak, tanpa memakai model gambar yang telah dilatih pihak lain.',
+ 'baseline':'Metode pembanding sederhana. Model baru perlu lebih baik pada protokol validasi identik, bukan hanya menghasilkan prediksi.',
+ 'warm-up':'Fase awal peningkatan learning rate secara bertahap untuk menstabilkan training.',
+ 'cosine':'Jadwal learning rate yang menurun mengikuti fungsi cosinus setelah warm-up.',
+ 'dropout':'Regularisasi dengan menonaktifkan fitur acak saat training. Dinonaktifkan saat inference.',
+ 'mask':'Penanda biner untuk membedakan data valid dan padding, atau label tersedia dan label tidak tersedia.',
+ 'OOF EMD':'Skor EMD atas prediksi out-of-fold. Setiap sampel diprediksi model yang tidak melihat label maupun kelompoknya saat training.',
+ 'censored':'Nilai di luar jangkauan pengukuran yang tersedia; dilaporkan tidak terdefinisi, tidak ditebak melalui extrapolation.',
+ 'D30':'Diameter pada 30% massa lolos, dihitung lewat inverse CDF log-linear jika berada dalam dukungan.',
+ 'D60':'Diameter pada 60% massa lolos. Bersama D10 dapat dipakai untuk koefisien uniformitas Cu bila keduanya valid.',
+ 'MAE':'Mean Absolute Error: rata-rata selisih absolut prediksi dan target. Satuan mengikuti target, misalnya poin persentase atau mm.',
+ 'CI95':'Interval kepercayaan 95% menurut prosedur bootstrap yang ditentukan. Tidak berarti 95% semua prediksi individu benar.',
+ 'OOF lengkap':'Setiap sampel memiliki tepat satu prediksi validasi, seluruh fold selesai, dan tidak ada kelompok bocor ke training.',
+ 'hyperparameters':'Pengaturan training/model sebelum belajar: epoch, batch, learning rate dan tile. Sama dengan hyperparameter.',
+ 'FFT':'Fast Fourier Transform: algoritme untuk menghitung transformasi Fourier dengan biaya O(M log M) pada M piksel.',
+ 'MiB':'Mebibyte: 2²⁰ byte. Berbeda dari MB desimal 10⁶ byte.',
+ 'GMAC':'Satu miliar multiply–accumulate. Profil proyek hanya menghitung modul Conv2d dan Linear.',
+ 'GAP':'Global Average Pooling: merata-ratakan fitur pada seluruh posisi spasial menjadi satu angka per kanal.',
+ 'GN':'Singkatan GroupNorm; normalisasi per kelompok kanal, bukan per batch.',
+ 'DW':'Singkatan depthwise convolution; filter per kanal sebelum pencampuran 1×1.',
+ 'CLRRegressor':'Regresi target distribusi dalam koordinat centered log-ratio massa; inverse softmax menghasilkan proporsi valid.',
+ 'kNN':'k-nearest neighbors: memprediksi dari k sampel latih yang fiturnya paling dekat dengan sampel baru.',
+ 'full fit':'Melatih model tambahan memakai seluruh label train setelah cross-validation; menambah biaya dan bukan sumber skor OOF.',
+ 'channel':'Kanal fitur gambar. RGB mempunyai tiga kanal; texture stream menambah dua kanal analitik.',
+ 'std':'Standard deviation: simpangan baku. Menggambarkan keragaman fitur, bukan ketidakpastian prediksi yang terkalibrasi.'
+});
+
+</script><script>
+/* Shared numerical definitions. All demo curves are illustrative, not results. */
+(function(root) {
+  'use strict';
+  const diameters = [0.002,0.0063,0.02,0.063,0.2,0.63,2,6.3,20,63,200];
+  const weights = diameters.slice(1).map((d,i)=>Math.log10(d)-Math.log10(diameters[i]));
+  function cdf(logits) {
+    if(logits.length!==11 || !logits.every(Number.isFinite)) throw Error('11 logit finite diperlukan');
+    const max=Math.max(...logits), exp=logits.map(v=>Math.exp(v-max)), sum=exp.reduce((a,b)=>a+b,0);
+    const masses=exp.map(v=>100*v/sum); let total=0;
+    const curve=masses.map(v=>total+=v); curve[10]=100;
+    return {masses,curve};
+  }
+  function emd(a,b) {
+    if(a.length!==11 || b.length!==11 || ![...a,...b].every(Number.isFinite)) throw Error('Kurva harus memiliki 11 nilai finite');
+    const contributions=weights.map((w,i)=>w*Math.abs(a[i]-b[i]));
+    return {total:contributions.reduce((a,b)=>a+b,0),contributions};
+  }
+  function cost({epochs,steps,folds,seeds,seconds,overhead,fullFit=false}) {
+    if(![epochs,steps,folds,seeds,seconds,overhead].every(Number.isFinite)||Math.min(epochs,steps,folds,seeds,seconds)<=0||overhead<0) throw Error('Parameter biaya tidak valid');
+    const updates=epochs*steps*(folds+(fullFit?1:0))*seeds;
+    return {updates,trainingHours:updates*seconds/3600,totalHours:updates*seconds/3600*(1+overhead/100)};
+  }
+  const api={diameters,weights,cdf,emd,cost}; root.PhyMath=api;
+  if(typeof module!=='undefined') module.exports=api;
+})(typeof globalThis!=='undefined'?globalThis:this);
+
+</script><script>
+/* Offline interactions: educational simulation and read-only evidence import. */
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id), P=window.PROJECT, M=window.PhyMath, G=window.GLOSSARY;
+  const num=(v,d=2)=>Number(v).toLocaleString('id-ID',{maximumFractionDigits:d});
+  const put=(id,text)=>{if($(id)) $(id).textContent=text;};
+  const node=(tag,text,cls)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(cls)el.className=cls;return el;};
+  const config=P.config, profile=P.profile.model;
+  document.querySelectorAll('[data-snapshot-date]').forEach(el=>el.textContent=P.snapshot_date);
+  put('software-progress',`${P.status.software_release.completion_percent}%`);
+  put('research-progress',`${P.status.overall_progress_percent}%`);
+  if($('software-bar'))$('software-bar').style.width=`${P.status.software_release.completion_percent}%`;
+  if($('research-bar'))$('research-bar').style.width=`${P.status.overall_progress_percent}%`;
+  put('status-note',`Rilis lokal: ${P.status.software_release.completion_percent}%; riset keseluruhan: ${P.status.overall_progress_percent}%; kesiapan kompetisi: ${P.status.competition_readiness_percent}%. Training Kaggle, OOF lengkap, dan leaderboard belum tersedia.`);
+  put('parameter-count',`${num(profile.parameters/1e6,2)} M`);
+  put('gmacs',`${num(profile.forward_macs_batch/1e9,2)}`);
+  put('weights-memory',`${num(profile.weight_mib_fp32)} MiB`);
+  put('state-memory',`${num(profile.adamw_plus_ema_state_mib_fp32)} MiB`);
+  put('local-hardware',`${P.profile.hardware.torch} · ${P.profile.hardware.cuda_available?'CUDA tersedia':'CPU saja; CUDA tidak tersedia'}`);
+  put('paper-parameters',num(profile.parameters,0));
+  put('paper-macs',`${num(profile.forward_macs_batch/1e9,3)} GMAC / ≈${num(profile.forward_flops_approx_batch/1e9,3)} GFLOP`);
+  put('paper-weights',`${num(profile.weight_mib_fp32)} MiB`);
+  put('paper-states',`${num(profile.adamw_plus_ema_state_mib_fp32)} MiB`);
+  put('paper-input',`${num(profile.input_mib_fp32)} MiB`);
+
+  const tooltip=$('term-tip'); let tipTrigger=null;
+  function hideTip(){tooltip.hidden=true;if(tipTrigger)tipTrigger.removeAttribute('aria-describedby');tipTrigger=null;}
+  function showTip(el){
+    const key=el.dataset.term; if(!G[key])return;
+    tooltip.textContent=`${key} — ${G[key]}`;tooltip.hidden=false;tipTrigger=el;el.setAttribute('aria-describedby','term-tip');
+    const r=el.getBoundingClientRect(),tr=tooltip.getBoundingClientRect();
+    tooltip.style.left=`${Math.max(8,Math.min(innerWidth-tr.width-8,r.left))}px`;
+    tooltip.style.top=`${r.bottom+tr.height+10>innerHeight?Math.max(8,r.top-tr.height-8):r.bottom+8}px`;
+  }
+  function prepareTerms(scope=document){
+    scope.querySelectorAll('[data-term]:not(button)').forEach(el=>{const b=node('button',el.textContent,'term');b.type='button';b.dataset.term=el.dataset.term;el.replaceWith(b);});
+    scope.querySelectorAll('button[data-term]:not([data-ready])').forEach(el=>{el.dataset.ready='1';el.classList.add('term');el.addEventListener('mouseenter',()=>showTip(el));el.addEventListener('mouseleave',hideTip);el.addEventListener('focus',()=>showTip(el));el.addEventListener('blur',hideTip);el.addEventListener('click',()=>showTip(el));});
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')hideTip();});
+  document.addEventListener('click',e=>{if(!e.target.closest('[data-term]'))hideTip();});
+  window.addEventListener('scroll',hideTip,{passive:true});
+  prepareTerms();
+  // Annotate further technical terms in prose, without touching code/controls.
+  const keys=Object.keys(G).sort((a,b)=>b.length-a.length), escaped=keys.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  const pattern=new RegExp(`(?<![\\w-])(${escaped.join('|')})(?![\\w-])`,'gi');
+  const keyMap=Object.fromEntries(keys.map(k=>[k.toLowerCase(),k]));
+  function annotateTerms(scope){
+  const walker=document.createTreeWalker(scope,NodeFilter.SHOW_TEXT);
+  const texts=[];while(walker.nextNode())texts.push(walker.currentNode);
+  texts.forEach(text=>{
+    if(!text.parentElement || text.parentElement.closest('button,a,code,pre,svg,script,input,select,textarea,label,[data-term],#glossary,.equation'))return;
+    const str=text.nodeValue;pattern.lastIndex=0;let match,last=0,frag=document.createDocumentFragment(),found=false;
+    while((match=pattern.exec(str))){found=true;frag.append(document.createTextNode(str.slice(last,match.index)));const b=node('button',match[0],'term');b.type='button';b.dataset.term=keyMap[match[0].toLowerCase()];frag.append(b);last=pattern.lastIndex;}
+    if(found){frag.append(document.createTextNode(str.slice(last)));text.replaceWith(frag);}
+  });prepareTerms(scope);
+  }
+  annotateTerms(document.querySelector('main'));
+
+  document.querySelectorAll('[data-print]').forEach(b=>b.addEventListener('click',()=>window.print()));
+  const steps=[
+    ['Foto + metadata','RGB penuh dari 2–5 pandangan; sample_id dan PPM kamera. Label laboratorium hanya untuk training.','Katalog foto → sampel → kamera → PPM; target 11 titik per tanah.','Mencocokkan ID dan memisahkan label train dari foto test mencegah salah mapping. Audit gagal jika metadata penting tidak valid.','src/phygrainnet/data/catalog.py'],
+    ['Kalibrasi fisik','Foto native dan PPM yang telah disesuaikan dengan ukuran file aktual.','Crop border 6% → resample 10 px/mm → gray-world → image canonical di cache.','Tanah berukuran sama harus mempunyai ukuran piksel konsisten meski kamera berubah. Cache bergantung identitas foto serta parameter fisik.','src/phygrainnet/data/imaging.py'],
+    ['Tile dua skala','Image canonical seluruh foto satu sampel.','Training: B×T×S×3×256×256; bidang 25,6 mm dan 102,4 mm.','Detail lokal dan konteks dipusatkan pada lokasi yang sama. Sampling dari semua foto menambah keragaman tanpa menambah jumlah label.','src/phygrainnet/training/data.py'],
+    ['Encoder tekstur','Tile RGB; bentuk B×T×S×3×256×256.','Sobel magnitude + Laplacian → 5 kanal → GrainBlock → mean/std spasial → 448 fitur per skala.','Filter analitik tidak memakai bobot pretrained. Dua skala berbagi encoder, tetapi tetap dihitung keduanya.','src/phygrainnet/models/phygrainnet.py'],
+    ['Satukan pandangan','448 fitur per skala → concat 896 → proyeksi embedding tile 256.','Pool mean / std / attention → 768 → MLP embedding sampel 256.','Himpunan tile menjadi satu representasi sampel. Inference mengodekan tile per chunk, lalu mempool seluruh tile bersama.','src/phygrainnet/models/phygrainnet.py'],
+    ['Kurva GSD + CSV','Embedding sampel 256; head linear menghasilkan 11 logit.','Softmax → 11 massa total 100 → cumsum → CDF; validasi ID, schema, batas dan endpoint sebelum CSV.','Satu sampel satu kurva. Kolom diameter harus dalam urutan template; 200 mm tepat 100. Nilai non-finite ditolak.','src/phygrainnet/submission.py']
+  ];
+  function selectStep(i){
+    const [title,input,output,reason,file]=steps[i], container=$('flow-detail');if(!container)return;
+    container.replaceChildren();container.append(node('h3',`${i+1}. ${title}`));
+    const row=node('div',undefined,'flow-detail');[[ 'Masukan',input],['Keluaran',output]].forEach(([name,text])=>{const io=node('div',undefined,'io');io.append(node('strong',name),node('p',text));row.append(io);});
+    container.append(row,node('p',reason,'small'),node('code',file));
+    document.querySelectorAll('[data-step]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.step===i)));
+    annotateTerms(container);
+  }
+  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>selectStep(+b.dataset.step)));selectStep(0);
+  if($('shape-track')){
+    const b=config.training.batch_size,t=config.training.tiles_per_sample,s=config.data.fields_mm.length;
+    [['Input',1,`${b}×${t}×${s}×3×256×256`],['Texture',.94,`${b*t} per skala ×5×256×256`],['Encoder',.8,`${b*t}×224×8×8`],['Spatial pool',.6,`${b*t}×448 per skala`],['Tile project',.43,`${b}×${t}×256`],['Bag pool',.3,`${b}×768`],['MLP',.22,`${b}×256`],['CDF',.08,`${b}×11`]].forEach(([label,width,shape])=>{const row=node('div',undefined,'shape-row'),bar=node('span');bar.style.width=`${width*100}%`;row.append(node('strong',label),bar,node('code',shape));$('shape-track').append(row);});
+  }
+  if($('ablation-rows'))P.ablations.forEach(a=>{const tr=node('tr');tr.append(node('td',a.id),node('td',a.description));$('ablation-rows').append(tr);});
+  if($('gate-grid'))Object.entries(P.status.gates).forEach(([key,g])=>{const a=node('article',undefined,'panel');a.append(node('span',g.status,'badge pending'),node('h3',`${key} · ${g.name}`),node('p',`${num(g.completion*100,0)}% item evidence. Kriteria lengkap di docs/READINESS_GATE.md.`, 'small muted'));$('gate-grid').append(a);});
+  if($('hyperparameter-rows')){
+    const t=config.training,d=config.data,inf=config.inference,m=config.model;
+    [['Seed',P.status.default_seed,'Seed awal; finalis 42/123/2026'],['Skala canonical',`${d.target_ppm} px/mm`,'0,1 mm/piksel'],['Bidang / tile',`${d.fields_mm.join(' / ')} mm; ${d.tile_px} px`,'Dua crop konsentris'],['Batch / tile / skala',`${t.batch_size} / ${t.tiles_per_sample} / ${d.fields_mm.length}`,'Satu item adalah tanah'],['Epoch / step',`${t.epochs} / ${t.steps_per_epoch}`,'Sampling acak, 2.000 update/fold'],['Optimizer','AdamW','Learning rate adaptif'],['Learning rate',t.learning_rate,'Warm-up + cosine'],['Weight decay',t.weight_decay,'Regularisasi'],['Warm-up',`${t.warmup_steps} step`,'10% update awal/fold'],['Clip norm',t.gradient_clip_norm,'Setelah unscale AMP'],['EMA',t.ema_decay,'Bobot rata-rata bergerak'],['Dropout',m.dropout,'Sebelum/sesudah MLP'],['Tile mixing / jitter',`${t.mix_prob} / ±${t.scale_jitter*100}%`,'Augmentasi'],['Eval interval',`${t.eval_every} epoch`,'Hanya monitoring, fixed schedule'],['TTA / grid limit / chunk',`${inf.tta} / ${inf.max_tiles_per_image} / ${inf.chunk}`,'Rotasi / per foto / tile encoder'],['CV',`${config.cv.strategy} × ${config.cv.n_folds}`,'Kelompok ID utuh'],['AMP / full fit',`${t.amp} / ${t.full_fit}`,'CUDA FP16 / tanpa full fit tambahan']].forEach(values=>{const tr=node('tr');values.forEach(v=>tr.append(node('td',String(v))));$('hyperparameter-rows').append(tr);});
+  }
+
+  const NS='http://www.w3.org/2000/svg';
+  function svgNode(tag,attrs,text){const e=document.createElementNS(NS,tag);Object.entries(attrs||{}).forEach(([k,v])=>e.setAttribute(k,String(v)));if(text!==undefined)e.textContent=text;return e;}
+  function setupSvg(svg,height=285){const width=Math.max(280,Math.round(svg.getBoundingClientRect().width));svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.replaceChildren();return {width,height};}
+  function cdfChart(svg,target,pred){
+    if(!svg)return;const {width:w,height:h}=setupSvg(svg),l=46,r=18,top=18,bottom=h-48;
+    const x=v=>l+(Math.log10(v)-Math.log10(M.diameters[0]))/5*(w-l-r),y=v=>bottom-v/100*(bottom-top);
+    [0,25,50,75,100].forEach(v=>{svg.append(svgNode('line',{x1:l,y1:y(v),x2:w-r,y2:y(v),class:'axis'}),svgNode('text',{x:l-8,y:y(v)+4,'text-anchor':'end'},v));});
+    const ticks=w<430?[.002,.063,2,200]:[.002,.02,.2,2,20,200];
+    ticks.forEach((d,i)=>svg.append(svgNode('text',{x:x(d),y:bottom+21,'text-anchor':i===0?'start':i===ticks.length-1?'end':'middle'},num(d,4))));
+    svg.append(svgNode('text',{x:l,y:12},'Lolos (% massa)'),svgNode('text',{x:(w+l-r)/2,y:h-6,'text-anchor':'middle'},'Diameter (mm) · sumbu log₁₀'));
+    [[target,'target'],[pred,'prediction']].forEach(([c,cls])=>{svg.append(svgNode('path',{d:c.map((v,i)=>`${i?'L':'M'}${x(M.diameters[i])},${y(v)}`).join(' '),class:cls}));c.forEach((v,i)=>{const dot=svgNode('circle',{cx:x(M.diameters[i]),cy:y(v),r:3,fill:cls==='target'?'#12654f':'#ad581c'});dot.append(svgNode('title',{},`${cls==='target'?'Referensi':'Prediksi'}: ${M.diameters[i]} mm = ${num(v)}%`));svg.append(dot);});});
+  }
+  function contributionChart(svg,values){
+    if(!svg)return;const {width:w,height:h}=setupSvg(svg),l=42,r=10,top=25,bottom=h-48,max=Math.max(1,...values)*1.15,slot=(w-l-r)/10;
+    [0,.5,1].forEach(f=>{const y=bottom-f*(bottom-top);svg.append(svgNode('line',{x1:l,y1:y,x2:w-r,y2:y,class:'axis'}),svgNode('text',{x:l-7,y:y+4,'text-anchor':'end'},num(max*f,1)));});
+    values.forEach((v,i)=>{const rect=svgNode('rect',{x:l+i*slot+2,y:bottom-v/max*(bottom-top),width:slot-4,height:v/max*(bottom-top),fill:'#a8c590',rx:2});rect.append(svgNode('title',{},`${M.diameters[i]}–${M.diameters[i+1]} mm: ${num(v)} EMD`));svg.append(rect);if(w>430||i%3===0)svg.append(svgNode('text',{x:l+(i+.5)*slot,y:bottom+20,'text-anchor':'middle'},i+1));});
+    svg.append(svgNode('text',{x:l,y:14},'Kontribusi EMD'),svgNode('text',{x:(w+l-r)/2,y:h-6,'text-anchor':'middle'},'Interval diameter 1—10'));
+  }
+  const presets={balanced:[4,8,14,23,37,53,70,83,93,98,100],fine:[20,32,48,70,89,96,99,100,100,100,100],gravel:[1,3,6,10,17,26,39,58,80,94,100]};
+  let currentTarget=presets.balanced, currentPrediction=M.cdf(Array(11).fill(0)).curve;
+  if($('mass-controls'))Array.from({length:11},(_,i)=>{const label=node('label',`${num(M.diameters[i],4)} mm`),input=node('input');input.type='number';input.min=-20;input.max=20;input.step=.25;input.value=0;input.id=`logit-${i}`;input.setAttribute('aria-label',`Logit ${i+1} untuk massa hingga ${M.diameters[i]} mm`);input.addEventListener('input',updateCurve);label.append(input);$('mass-controls').append(label);});
+  function updateCurve(){
+    if(!$('mass-controls'))return;const logits=Array.from({length:11},(_,i)=>+$( `logit-${i}`).value);
+    if(!logits.every(Number.isFinite)){put('curve-result','Isi 11 logit dengan angka valid.');return;}
+    const {masses,curve}=M.cdf(logits);currentPrediction=curve;const score=M.emd(currentTarget,curve);
+    cdfChart($('cdf-chart'),currentTarget,curve);contributionChart($('emd-chart'),score.contributions);
+    put('curve-result',`EMD ilustrasi ${num(score.total,3)} · total massa ${num(masses.reduce((a,b)=>a+b,0))}% · endpoint ${curve[10]}% · kurva monoton`);
+    const f=[curve[0],curve[3]-curve[0],curve[6]-curve[3],100-curve[6]],names=['Lempung','Lanau','Pasir','Kerikil'];$('fraction-bar').replaceChildren();
+    f.forEach((v,i)=>{const seg=node('span',v>14?`${num(v,1)}%`:'');seg.style.width=`${v}%`;seg.title=`${names[i]}: ${num(v)}%`;$('fraction-bar').append(seg);});
+    put('fraction-label',f.map((v,i)=>`${names[i]} ${num(v)}%`).join(' · '));
+  }
+  if($('soil-preset'))$('soil-preset').addEventListener('change',()=>{currentTarget=presets[$('soil-preset').value];updateCurve();});
+  if($('reset-curve'))$('reset-curve').addEventListener('click',()=>{Array.from({length:11},(_,i)=>$( `logit-${i}`).value=0);updateCurve();});
+  if($('download-demo'))$('download-demo').addEventListener('click',()=>{const csv=`sample_id,${M.diameters.join(',')}\nDEMO_NOT_MODEL_RESULT,${currentPrediction.map(v=>v.toFixed(4)).join(',')}\n`;const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})),a=node('a');a.href=url;a.download='illustrative_curve_NOT_submission.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+  updateCurve();cdfChart($('paper-cdf-chart'),presets.balanced,M.cdf(Array(11).fill(0)).curve);
+  function updateScale(){
+    if(!$('scale-chart'))return;const mm=+$('grain-mm').value,ppm=+$('camera').value,svg=$('scale-chart'),{width:w}=setupSvg(svg,210),barMax=Math.min(300,w-120),native=mm*ppm,canon=mm*10,max=Math.max(10,native,canon);
+    put('grain-mm-value',`${num(mm,1)} mm`);
+    [['Native',native,'#ad581c'],['Canonical',canon,'#12654f']].forEach(([label,px,color],i)=>{const y=42+i*72;svg.append(svgNode('text',{x:8,y:y-10},label),svgNode('rect',{x:8,y,width:Math.max(3,barMax*px/max),height:24,rx:4,fill:color}),svgNode('text',{x:16+barMax*px/max,y:y+17},`${num(px,1)} px`));});
+    svg.append(svgNode('text',{x:8,y:194},'Panjang bar proporsional · ilustrasi diameter'));
+    put('scale-result',`${num(mm,1)} mm → ${num(native,1)} px native → ${num(canon,1)} px pada 10 px/mm`);
+  }
+  ['camera','grain-mm'].forEach(id=>{if($(id))$(id).addEventListener('input',updateScale);});updateScale();
+  function updateCost(){
+    if(!$('cost-result'))return;
+    try{const c=M.cost({epochs:+$('cost-epochs').value,steps:+$('cost-steps').value,folds:+$('cost-folds').value,seeds:+$('cost-seeds').value,seconds:+$('cost-seconds').value,overhead:+$('cost-overhead').value,fullFit:$('cost-full').checked}),rate=+$('cost-rate').value;if(!Number.isFinite(rate)||rate<0)throw Error('Harga harus ≥ 0');
+      put('cost-result',`${num(c.updates,0)} update · ${num(c.totalHours)} jam perkiraan · $${num(c.totalHours*rate)}`);
+      put('cost-detail',`Training inti ${num(c.trainingHours)} jam + overhead ${num(c.totalHours-c.trainingHours)} jam. Asumsi satu GPU, tidak termasuk antrean dan setup. Ini estimasi, bukan hasil terukur full CV.`);
+    }catch(e){put('cost-result',e.message);}
+  }
+  document.querySelectorAll('[id^="cost-"]').forEach(el=>{if(el.matches('input'))el.addEventListener('input',updateCost);});updateCost();
+  async function readJson(input){const f=input.files[0];if(!f)return null;if(f.size>20*1024*1024)throw Error('File melebihi batas 20 MiB');return JSON.parse(await f.text());}
+  if($('profile-file'))$('profile-file').addEventListener('change',async e=>{try{const data=await readJson(e.target);if(!data)return;const b=data.benchmark;if(!b||!Number.isFinite(b.seconds_per_step)||b.seconds_per_step<=0)throw Error('Tidak ada benchmark seconds_per_step yang valid');
+    const cfg=data.config;if(!cfg?.training||!cfg?.data)throw Error('Profile harus menyertakan konfigurasi');
+    if(cfg.training.batch_size!==config.training.batch_size||cfg.training.tiles_per_sample!==config.training.tiles_per_sample||cfg.data.tile_px!==config.data.tile_px||JSON.stringify(cfg.data.fields_mm)!==JSON.stringify(config.data.fields_mm)||JSON.stringify(cfg.model)!==JSON.stringify(config.model))throw Error('Bentuk model/batch/tile/skala berbeda dari C100. Kalibrasikan profil konfigurasi yang sama.');
+    $('cost-seconds').value=b.seconds_per_step;updateCost();put('profile-message',`Median terukur ${num(b.seconds_per_step,4)} detik/step pada ${b.device}; ${b.kind}. Data loader, validation dan IO belum termasuk. Nama GPU: ${b.hardware?.gpus?.[0]?.name||'CPU'}.`);
+  }catch(err){put('profile-message',`Impor ditolak: ${err.message}`);}});
+
+  function validateReport(data){
+    if(data.schema_version!==1||data.evidence_type!=='complete_grouped_oof'||!Array.isArray(data.runs)||!data.runs.length||data.runs.length>100)throw Error('Schema laporan OOF tidak cocok');
+    for(const r of data.runs){
+      if(typeof r.experiment_id!=='string'||!Number.isFinite(r.cv_emd)||r.cv_emd<0||r.cv_emd>500||!r.ci95||![r.ci95.lower,r.ci95.upper].every(Number.isFinite)||r.ci95.lower>r.ci95.upper||!Number.isInteger(r.n_oof)||r.n_oof<1||r.n_oof>10000||!Array.isArray(r.curves)||r.curves.length!==r.n_oof)throw Error('Data run/CI/kurva tidak valid');
+      const ids=new Set();for(const c of r.curves){if(typeof c.sample_id!=='string'||ids.has(c.sample_id))throw Error('ID duplikat/tidak valid');ids.add(c.sample_id);for(const key of ['target','prediction']){const a=c[key];if(!Array.isArray(a)||a.length!==11||!a.every(v=>Number.isFinite(v)&&v>=0&&v<=100)||a[10]!==100||a.some((v,i)=>i&&v<a[i-1]))throw Error('Kurva impor invalid');}}
+      const score=r.curves.map(c=>M.emd(c.target,c.prediction).total).reduce((a,b)=>a+b,0)/r.n_oof;
+      if(Math.abs(score-r.cv_emd)>1e-3)throw Error('Skor CV tidak cocok dengan kurva');
+    }
+    return data;
+  }
+  if($('report-file'))$('report-file').addEventListener('change',async e=>{
+    try{const raw=await readJson(e.target);if(!raw)return;const data=validateReport(raw),container=$('report-content');container.replaceChildren();container.hidden=false;
+      const table=node('table'),head=node('thead'),hr=node('tr');['Eksperimen','OOF','CV EMD','CI95','Group','Sumber'].forEach(v=>hr.append(node('th',v)));head.append(hr);table.append(head);const body=node('tbody');
+      data.runs.forEach(r=>{const tr=node('tr');[r.experiment_id,r.n_oof,num(r.cv_emd,3),`${num(r.ci95.lower)}–${num(r.ci95.upper)}`,r.ci95.clusters??'—',(r.provenance?.source_manifest_sha256 ? `bundle ${r.provenance.source_manifest_sha256.slice(0,12)}` : r.provenance?.git_commit??'—')].forEach(v=>tr.append(node('td',String(v))));body.append(tr);});table.append(body);const wrap=node('div',undefined,'table-wrap');wrap.append(table);container.append(wrap);
+      const controls=node('div',undefined,'control-row'),runLabel=node('label','Eksperimen'),runSelect=node('select'),sampleLabel=node('label','Sampel'),sampleSelect=node('select');data.runs.forEach((r,i)=>{const o=node('option',r.experiment_id);o.value=i;runSelect.append(o);});runLabel.append(runSelect);sampleLabel.append(sampleSelect);controls.append(runLabel,sampleLabel);container.append(controls);const svg=svgNode('svg',{class:'chart',role:'img','aria-label':'Target dan prediksi OOF sampel yang dipilih'}),info=node('p',undefined,'caption');container.append(svg,info);
+      function sampleUpdate(){const r=data.runs[+runSelect.value],c=r.curves[+sampleSelect.value];if(!c)return;cdfChart(svg,c.target,c.prediction);const fractions=r.fraction_mae_pp;info.textContent=`${c.sample_id}: EMD ${num(M.emd(c.target,c.prediction).total,3)}. Fraction MAE run (pp): ${fractions?Object.entries(fractions).map(([k,v])=>`${k} ${num(v)}`).join(' · '):'tidak tersedia'}.`;}
+      function runUpdate(){const r=data.runs[+runSelect.value];sampleSelect.replaceChildren();r.curves.forEach((c,i)=>{const o=node('option',c.sample_id);o.value=i;sampleSelect.append(o);});sampleUpdate();}
+      runSelect.addEventListener('change',runUpdate);sampleSelect.addEventListener('change',sampleUpdate);runUpdate();new ResizeObserver(sampleUpdate).observe(svg);
+      if(data.comparisons?.length){container.append(node('h3','Perbandingan berpasangan'));data.comparisons.forEach(c=>{if(c.delta_emd_ci95&&[c.delta_emd_ci95.estimate,c.delta_emd_ci95.lower,c.delta_emd_ci95.upper].every(Number.isFinite))container.append(node('p',`${c.candidate} − ${c.reference}: ΔEMD ${num(c.delta_emd_ci95.estimate,3)}, CI95 ${num(c.delta_emd_ci95.lower)}–${num(c.delta_emd_ci95.upper)}; kelompok membaik ${c.groups_improved}/${c.n_groups}. Delta negatif menguntungkan candidate.`,'small'));});}
+      put('report-message',`${data.runs.length} run diimpor dan kurva/skor diperiksa di browser. Integritas fold diverifikasi oleh exporter Python; file ini bukan bukti autentikasi dataset. Impor tidak mengubah status global.`);put('evidence-badge','Laporan OOF diimpor');
+    }catch(err){put('report-message',`Impor ditolak: ${err.message}`);$('report-content').hidden=true;}
+  });
+  function glossary(){if(!$('glossary-list'))return;const q=($('glossary-search')?.value||'').toLowerCase();$('glossary-list').replaceChildren();Object.entries(G).filter(([k,v])=>(k+' '+v).toLowerCase().includes(q)).sort(([a],[b])=>a.localeCompare(b)).forEach(([k,v])=>{const a=node('article');a.append(node('h3',k),node('p',v));$('glossary-list').append(a);});if(!$('glossary-list').childElementCount)$('glossary-list').append(node('p','Tidak ada istilah yang cocok.'));}
+  if($('glossary-search'))$('glossary-search').addEventListener('input',glossary);glossary();
+  const chartRedraw=()=>{updateCurve();updateScale();cdfChart($('paper-cdf-chart'),presets.balanced,M.cdf(Array(11).fill(0)).curve);};
+  const ro=new ResizeObserver(chartRedraw);['cdf-chart','emd-chart','scale-chart','paper-cdf-chart'].forEach(id=>{if($(id))ro.observe($(id));});
+  const navLinks=document.querySelectorAll('.sidebar nav a');const sectionObserver=new IntersectionObserver(entries=>{for(const e of entries)if(e.isIntersecting){navLinks.forEach(a=>a.classList.toggle('active',a.hash===`#${e.target.id}`));}},{rootMargin:'-10% 0px -65% 0px'});document.querySelectorAll('section[id]').forEach(s=>sectionObserver.observe(s));
+})();
+
+</script></body></html>

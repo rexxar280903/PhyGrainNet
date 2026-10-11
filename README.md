@@ -7,6 +7,9 @@ PhyGrainNet is our entry to the Kaggle competition [Predicting Soil Grain Size D
 ## Project status
 
 <!-- STATUS:START -->
+**Local development release: 100%**
+Implementation, interactive portal and research tools; separate from Kaggle evidence.
+
 **Overall project progress: 10%**  
 `███░░░░░░░░░░░░░░░░░░░░░░░ 10%`
 
@@ -22,7 +25,17 @@ PhyGrainNet is our entry to the Kaggle competition [Predicting Soil Grain Size D
 
 `project_status.json` is the source of truth; `python scripts/update_readiness.py` regenerates this block (CI checks it). The week-by-week plan is in [`docs/SCHEDULE.md`](docs/SCHEDULE.md).
 
-## The task in one table
+## Dashboard dan paper interaktif (Bahasa Indonesia)
+
+Buka **[dashboard offline](docs/dashboard.html)** untuk mengikuti input → output, arsitektur tensor, simulasi softmax/CDF/EMD, skala kamera, kalkulator waktu/biaya, target, dan kamus istilah dengan komentar hover/fokus/ketuk. **[Paper metode](docs/paper.html)** menjelaskan dataset, persamaan, hyperparameter, Big O, biaya, protokol evaluasi, figur, tabel, keterbatasan, dan referensi. Keduanya berupa HTML mandiri: klik dua kali untuk membuka di browser, tanpa instalasi atau internet. Tombol cetak pada paper mendukung simpan PDF.
+
+Rilis pengembangan lokal dan kemajuan riset memiliki status terpisah. **100% rilis lokal** berarti checklist perangkat v0.3 selesai; **100% riset** membutuhkan audit data Kaggle, training/CV nyata, ablation, submission dan bukti G0–G5. Portal tidak menjalankan training di browser dan tidak menampilkan skor kompetisi yang belum tersedia.
+
+Sumber yang dapat diedit berada di `web/`. Setelah mengubah status/YAML/aset, jalankan `python scripts/build_portal.py` untuk menyinkronkan snapshot dan kedua HTML mandiri. Detail: [panduan pengembangan v0.3](docs/DEVELOPMENT_RELEASE.md).
+
+Untuk memakai **kode lokal ini** di Kaggle tanpa menunggu push ke GitHub: `python scripts/export_source.py`, attach ZIP sebagai Kaggle Dataset kode, lalu isi `SOURCE_ARCHIVE` pada notebook dengan mount path-nya. Runner memverifikasi checksum. Jika memakai clone GitHub, pilih branch/commit yang sudah berisi v0.3; edit workspace tidak otomatis tersedia di `main`.
+
+## The prediction task
 
 | | |
 |---|---|
@@ -84,6 +97,16 @@ The notebook defaults to audit, baseline, GPU smoke test and a verified results 
 | P | pretraining runs |
 
 Every supervised run writes OOF/test curves, targets, groups, metrics, resolved configuration and environment details, plus a row in `/kaggle/working/registry.csv`; copy completed rows to `experiments/registry.csv`. Pretraining saves weights/config/history. Export results with `scripts/export_results.py`, persist a successful Kaggle version, and restore supervised checkpoints with `scripts/predict.py` to verify inference without retraining.
+
+Measure the actual GPU before budgeting, then export complete OOF evidence for the portal:
+
+```bash
+python scripts/profile_model.py --benchmark --device cuda --out /kaggle/working/outputs/profile.json
+python scripts/train.py --config configs/ablations/no_texture.yaml
+python scripts/research_report.py --runs /kaggle/working/outputs/C100 --out /kaggle/working/outputs/research_report.json
+```
+
+The profiler counts 1,518,836 parameters and 9.718 GMAC/batch (B2/T6/S2); Conv2d/Linear counts exclude other operations. Duration must be measured on the actual runtime. `research_report.py` rejects incomplete CV and leaking/mismatched folds, exports cluster-bootstrap CI95, fraction MAE, censored D10/D30/D50/D60 diagnostics, and optional paired comparisons. For comparisons, use the **same folds** (classical override: `cv.strategy=group_kfold cv.n_folds=5`). Import `profile.json` and `research_report.json` in the dashboard; imports do not change research status automatically.
 
 ## Repository layout
 

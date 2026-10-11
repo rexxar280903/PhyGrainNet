@@ -1,0 +1,6 @@
+# Retain native pixels; nominal mm fields no longer represent calibrated mm.
+base: ../phygrainnet/kaggle_scratch.yaml
+experiment_id: F106
+data:
+  canonical_scale: false
+notes_short: native pixels; fields not calibrated to mm
